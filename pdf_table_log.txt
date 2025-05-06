@@ -1,0 +1,185 @@
+
+
+--- Page 1 ---
+
+Table 1:
+Bid Details/(cid:1)(cid:1)बबडड (cid:1)(cid:1)ववववररणण | 
+Bid End Date/Time/(cid:1)(cid:1)बबडड बबंदंद हहोोनने े कक(cid:15)(cid:15) तताारर(cid:18)(cid:18)खख//ससममयय | 10-03-2025 15:00:00
+Bid Opening Date/Time/(cid:1)(cid:1)बबडड खखुलुलनने े कक(cid:15)(cid:15)
+तताारर(cid:18)(cid:18)खख//ससममयय | 10-03-2025 15:30:00
+Bid Offer Validity (From End Date)/(cid:1)(cid:1)बबडड पपेशेशककशश
+ववैधैधतताा ((बबंदंद हहोोनने े कक(cid:15)(cid:15) तताारर(cid:18)(cid:18)खख ससे)े) | 180 (Days)
+Ministry/State Name/ममं(cid:32)ं(cid:32)ााललयय//रराा(cid:33)(cid:33)यय ककाा ननाामम | Ministry Of Health And Family Welfare
+Department Name/(cid:1)(cid:1)ववभभाागग ककाा ननाामम | Department Of Health And Family Welfare
+Organisation Name/ससंगंगठठनन ककाा ननाामम | All India Institute Of Medical Sciences (aiims)
+Office Name/ककााययााल(cid:37)ल(cid:37) यय ककाा ननाामम | Jodhpur
+(cid:38)(cid:38)ेेतताा ईईममेलेल//Buyer Email | buyer131.aiimsa.rj@gembuyer.in
+Total Quantity/ककुुलल ममाा(cid:32)(cid:32)ाा | 9
+Item Category/ममदद ककेेटटेेगगरर(cid:18)(cid:18) | Large Robotics Bulldog clamp Jaw Straight , Large Robotics
+Bulldog clamp Jaw Curved , Robotics Bulldog clamp Jaw
+Curved , Robotics Bulldog clamp Jaw Straight , Single Action
+Robotics Bulldog Applicator
+GeMARPTS मम(cid:41) (cid:41) खखोोजजीी गगईई (cid:44)(cid:44)(cid:45)(cid:45)(cid:46)(cid:46)ंंगग / Searched
+Strings used in GeMARPTS | Instruments Set for Robotic OT for Kidney Transplant
+GeMARPTS मम(cid:41) (cid:41) खखोोजजाा गगययाा पप(cid:47)(cid:47)ररणणाामम / Searched
+Result generated in GeMARPTS | TERA Package 1 - Robotics and Automation High end
+Engineering (ASoSE), TERA Package 2 - Robotics and
+Automation High end Engineering (ASoSE), TERA Package 1
+- Robotics and Automation Modular Skilling Kits, TERA
+Package 1 - Robotics and Electro - Mechanical Components
+(ASoSE), TERA Package 1 - Robotics Demo Kits (ASoSE)
+अअििधधससूचूचननाा ककेे ििललएए चचययििननतत (cid:53)(cid:53)ााससंिंिगगकक (cid:54)(cid:54)(cid:44)े(cid:44)ेणणययााँ ँ / Relevant
+Categories selected for notification | Surgical Retractors
+BOQ Title/बबीीओओ(cid:57)(cid:57)ययू ू शशीीषषक(cid:37)क(cid:37) | Instruments for Robotic OT for Kidney Transplant
+MSE Exemption for Years of Experience and
+Turnover/ अअननुभुभवव ककेे ववषष(cid:59)(cid:59) ससे े एएममएएससईई छछूूटट | No
+Startup Exemption for Years of Experience
+and Turnover/ अअननुभुभवव ककेे ववषष(cid:59)(cid:59) ससे े (cid:45)(cid:45)टटााटट(cid:37)(cid:37)अअपप छछूूटट | No
+1 | 
+
+
+--- Page 2 ---
+
+Table 1:
+ | 
+Bid Details/(cid:1)(cid:1)बबडड (cid:1)(cid:1)ववववररणण | 
+Document required from seller/(cid:1)(cid:1)वव(cid:38)(cid:38)ेेतताा ससे े ममाांगंगेे
+गगएए दद(cid:45)(cid:45)ततााववेज़ेज़ | Experience Criteria,Certificate (Requested in ATC),OEM
+Authorization Certificate
+*In case any bidder is seeking exemption from Experience /
+Turnover Criteria, the supporting documents to prove his
+eligibility for exemption must be uploaded for evaluation by
+the buyer
+Do you want to show documents uploaded
+by bidders to all bidders participated in
+bid?/ | No
+Bid to RA enabled/(cid:1)(cid:1)बबडड ससे े (cid:47)(cid:47)ररववसस (cid:37) (cid:37) ननीीललााममीी सस(cid:62)(cid:62)(cid:38)(cid:38)यय (cid:62)(cid:62)ककययाा | Yes
+RA Qualification Rule | 50% Lowest Priced Technically Qualified Bidders
+Type of Bid/(cid:1)(cid:1)बबडड ककाा (cid:53)(cid:53)ककाारर | Two Packet Bid
+Primary product category | Large Robotics Bulldog clamp Jaw Straight
+Time allowed for Technical Clarifications
+during technical evaluation/ततककननीीकक(cid:15)(cid:15) ममू(cid:70)ू(cid:70)ययाांकंकनन ककेे
+ददौौरराानन ततककननीीकक(cid:15)(cid:15) (cid:45)(cid:45)पप(cid:72)(cid:72)ीीककररणण हहेेततु ु अअननुमुमतत ससममयय | 3 Days
+Inspection Required (By Empanelled
+Inspection Authority / Agencies pre-
+registered with GeM) | No
+Evaluation Method/ममू(cid:70)ू(cid:70)ययाांकंकनन पप(cid:73)(cid:73)िितत | Total value wise evaluation
+Arbitration Clause | No
+Mediation Clause | No
+
+Table 2:
+Advisory Bank/एडवाईजर(cid:18) ब(cid:74)क | Bank Of Baroda
+EMD Amount/ईएमड(cid:18) रािश | 25000
+
+Table 3:
+Advisory Bank/एडवाइजर(cid:18) ब(cid:74)क | Bank Of Baroda
+ePBG Percentage(%)/ईपीबीजी (cid:53)ितशत (%) | 3.00
+Duration of ePBG required (Months)/ईपीबीजी क(cid:15)
+अपे(cid:44)(cid:77)त अविध (मह(cid:18)ने). | 26
+
+
+--- Page 3 ---
+
+Table 1:
+MII Purchase Preference/एमआईआई खर(cid:18)द वर(cid:18)यता | Yes
+
+Table 2:
+MSE Purchase Preference/एमएसई खर(cid:18)द वर(cid:18)यता | Yes
+
+
+--- Page 4 ---
+
+Table 1:
+Pre-Bid Date and Time | Pre-Bid Venue
+21-02-2025 15:00:00 | Medical College, AIIMS Jodhpur
+
+Table 2:
+Specification Document | View File
+BOQ Detail Document | View File
+
+Table 3:
+S.No./(cid:38)(cid:38)..
+ससं.ं. | Consignee
+Reporting/Officer/
+पपररेे(cid:1)(cid:1)षषततीी//(cid:47)(cid:47)ररपपोो(cid:62)(cid:62)टट(cid:90)(cid:90)गग
+अअििधधककाारर(cid:18)(cid:18) | Address/पपतताा | Quantity/ममाा(cid:32)(cid:32)ाा | Delivery Days/(cid:62)(cid:62)डडललीीववरर(cid:18)(cid:18) ककेे
+(cid:62)(cid:62)ददनन
+1 | Binit Sureka | 342005,AIIMS Basani Industrial
+Area, Phase II Jodhpur | 2 | 30
+
+
+--- Page 5 ---
+
+Table 1:
+Specification Document | View File
+BOQ Detail Document | View File
+
+Table 2:
+S.No./(cid:38)(cid:38)..
+ससं.ं. | Consignee
+Reporting/Officer/
+पपररेे(cid:1)(cid:1)षषततीी//(cid:47)(cid:47)ररपपोो(cid:62)(cid:62)टट(cid:90)(cid:90)गग
+अअििधधककाारर(cid:18)(cid:18) | Address/पपतताा | Quantity/ममाा(cid:32)(cid:32)ाा | Delivery Days/(cid:62)(cid:62)डडललीीववरर(cid:18)(cid:18) ककेे
+(cid:62)(cid:62)ददनन
+1 | Binit Sureka | 342005,AIIMS Basani Industrial
+Area, Phase II Jodhpur | 2 | 30
+
+Table 3:
+Specification Document | View File
+BOQ Detail Document | View File
+
+
+--- Page 6 ---
+
+Table 1:
+S.No./(cid:38)(cid:38)..
+ससं.ं. | Consignee
+Reporting/Officer/
+पपररेे(cid:1)(cid:1)षषततीी//(cid:47)(cid:47)ररपपोो(cid:62)(cid:62)टट(cid:90)(cid:90)गग
+अअििधधककाारर(cid:18)(cid:18) | Address/पपतताा | Quantity/ममाा(cid:32)(cid:32)ाा | Delivery Days/(cid:62)(cid:62)डडललीीववरर(cid:18)(cid:18) ककेे
+(cid:62)(cid:62)ददनन
+1 | Binit Sureka | 342005,AIIMS Basani Industrial
+Area, Phase II Jodhpur | 2 | 30
+
+Table 2:
+Specification Document | View File
+BOQ Detail Document | View File
+
+Table 3:
+S.No./(cid:38)(cid:38)..
+ससं.ं. | Consignee
+Reporting/Officer/
+पपररेे(cid:1)(cid:1)षषततीी//(cid:47)(cid:47)ररपपोो(cid:62)(cid:62)टट(cid:90)(cid:90)गग
+अअििधधककाारर(cid:18)(cid:18) | Address/पपतताा | Quantity/ममाा(cid:32)(cid:32)ाा | Delivery Days/(cid:62)(cid:62)डडललीीववरर(cid:18)(cid:18) ककेे
+(cid:62)(cid:62)ददनन
+1 | Binit Sureka | 342005,AIIMS Basani Industrial
+Area, Phase II Jodhpur | 2 | 30
+
+Table 4:
+Specification Document | View File
+BOQ Detail Document | View File
+
+
+--- Page 7 ---
+
+Table 1:
+S.No./(cid:38)(cid:38)..
+ससं.ं. | Consignee
+Reporting/Officer/
+पपररेे(cid:1)(cid:1)षषततीी//(cid:47)(cid:47)ररपपोो(cid:62)(cid:62)टट(cid:90)(cid:90)गग
+अअििधधककाारर(cid:18)(cid:18) | Address/पपतताा | Quantity/ममाा(cid:32)(cid:32)ाा | Delivery Days/(cid:62)(cid:62)डडललीीववरर(cid:18)(cid:18) ककेे
+(cid:62)(cid:62)ददनन
+1 | Binit Sureka | 342005,AIIMS Basani Industrial
+Area, Phase II Jodhpur | 1 | 30
+
+
+--- Page 8 ---
+
+
+--- Page 9 ---
+
+
+--- Page 10 ---
+
+
+--- Page 11 ---

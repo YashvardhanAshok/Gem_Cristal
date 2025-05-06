@@ -1,0 +1,3 @@
+s = "500"
+num = float(s)
+print(num)  # Output: 500.0
