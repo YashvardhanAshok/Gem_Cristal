@@ -1,3 +1,5 @@
-s = "500"
-num = float(s)
-print(num)  # Output: 500.0
+gem_ids=['1','2','3',"4","5",'56','6']
+if str(1) in gem_ids:
+    print('hello')
+else:
+    pass
