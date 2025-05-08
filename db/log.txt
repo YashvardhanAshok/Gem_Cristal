@@ -1,0 +1,203 @@
+GEM.2025-05-08
+Tender found: Amc Of Kitchen Equipement
+Tender found: Amc Of Commercial Kitchen
+Tender found: Amc Of Gym Equipement
+Tender found: Amc Of Solar Power Plant
+Tender found: Amc Of Generators
+Was not able to find table for: Amc Of Transformers
+Was not able to find table for: Amc Of Lightning Arrestors
+Was not able to find table for: Amc Of Solar Water Heaters
+Was not able to find table for: Amc Of Fire Extinguishers
+Was not able to find table for: Amc Of Ac
+Was not able to find table for: Waste Management
+Was not able to find table for: Amc Of Ro And IRP
+Was not able to find table for: Construction Of Klps For Defense
+Was not able to find table for: Construction Of Admin Blocks
+Was not able to find table for: Construction Of Hospital
+Was not able to find table for: Construction Of Internal Roads
+Was not able to find table for: Development Of Infrastructure For Defense
+Was not able to find table for: Development Of Water Supply
+Was not able to find table for: Development Of Sewerage Treatement Plant
+Was not able to find table for: Fresh Vegetable
+Was not able to find table for: Fresh Fruits
+Was not able to find table for: Poultry Product (Chicken, Egg , Mutton)
+Was not able to find table for: Sea Food (Fish)
+Was not able to find table for: Dry Ration (Rice , Pulses , Sugar , Coffee, Tea)
+Was not able to find table for: Butter
+Was not able to find table for: Milk
+Was not able to find table for: Oil
+Was not able to find table for: Water Bowser
+Was not able to find table for: Water Tanker
+Was not able to find table for: Sedan / SUVS
+Was not able to find table for: Kunda Gadi
+Was not able to find table for: Pickup Truck
+Was not able to find table for: Air Freight Shipping
+Was not able to find table for: Fuel Cell
+Was not able to find table for: Solar Power Plant
+Was not able to find table for: Solar Battery
+Was not able to find table for: Electric Wires/Cable
+Was not able to find table for: A.C Static Meter
+Was not able to find table for: Lightning Arrestor
+Was not able to find table for: Miniature Circuit Breaker Switches
+Was not able to find table for: Solar Street Light
+Was not able to find table for: Solar Power Plant
+Was not able to find table for: Solar Water Heater
+Was not able to find table for: Solar Lantern
+Was not able to find table for: Solar Battery
+Was not able to find table for: Roti Making Machine
+Was not able to find table for: Milk Boiler
+Was not able to find table for: Dough Kneader
+Was not able to find table for: Bain Marie
+Was not able to find table for: Commercial Mixer
+Was not able to find table for: Wet Grinder
+Tender found: Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Error found in card:Vegetable Cutter
+Tender found: Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Error found in card:Rice Boiler
+Tender found: Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Error found in card:Idli Steamer
+Tender found: Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Error found in card:Oven
+Tender found: Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Error found in card:Tandoor
+Tender found: Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Error found in card:Water Dispenser
+Tender found: Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Error found in card:Water Cooling
+Tender found: Hand Held Gas Detector
+Tender found: Under Water Torch
+Tender found: Fuel Cell
+Tender found: Ppgi Sheet
+Was not able to find table for: Plywood
+Was not able to find table for: Puff Shelter
+Was not able to find table for: Puff Cabin
+Was not able to find table for: Gi Pipe
+Was not able to find table for: Cement
+Was not able to find table for: Bricks
+Was not able to find table for: Sand
+Was not able to find table for: Sanitary Items
+Was not able to find table for: Hardware Item
+Was not able to find table for: Flooring
+Was not able to find table for: Online UPS
+Was not able to find table for: Hybrid UPS
+Was not able to find table for: Ghillie Suits
+Was not able to find table for: X-ray Machine
+Was not able to find table for: Patient Bed Fowler
+Was not able to find table for: All Range Hospital Furniture
+Was not able to find table for: Patient Care Mattress
+Was not able to find table for: Under Water Torch
+Was not able to find table for: Rucksack Bags
+Was not able to find table for: Honey Sucker / Sewer Cum Jetting Machine
+Was not able to find table for: Jet Spray
+Was not able to find table for: Vaccum Cleaner
+Was not able to find table for: Wheel Barrow
+Was not able to find table for: Incinerators
+Was not able to find table for: Dustbin
+Was not able to find table for: FRP Tank
+Was not able to find table for: Bucket Mop Wringer Trolly
+Was not able to find table for: RO (Reverse Osmosis)
+Was not able to find table for: STP (Sewage Treatment Plants)
+Was not able to find table for: Battery
+Was not able to find table for: Less Lethal Weapons
+Was not able to find table for: CEW (Conducted Electrical Weapon)
+Tender found: Remote Restraint Device
+Error found in card:Remote Restraint Device
+Error found in card:Remote Restraint Device
+Error found in card:Remote Restraint Device
+Error found in card:Remote Restraint Device
+Error found in card:Remote Restraint Device
+Tender found: HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Error found in card:HHTI (Hand Held Thermal Imagers)
+Tender found: Weapon Sight
+Tender found: Search Light
+Tender found: GPS (Global Positioning System)
+Tender found: Satellite Tracker
+Tender found: Unmanned Aerial Vehicle
+Tender found: Robotics
+Tender found: Monitor
+Tender found: Printer
+Tender found: Speakers
+Tender found: Headphones
+Tender found: Projector
+Tender found: GPS
+Tender found: Plotter
+Was not able to find table for: Braille Embosser
+Tender found: 3D Printer
+Tender found: Tablet
+Tender found: Walkie Talkie
+Tender found: Software
+Tender found: Software Defined Radio
+Tender found: Cyber Forensics Software
+Was not able to find table for: Cyber Forensics Software
