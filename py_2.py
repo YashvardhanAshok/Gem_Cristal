@@ -222,6 +222,7 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                                                             "Opening Time": start_date_time,
                                                             "Closing Date": end_date,
                                                             "Closing Time": end_date_time,
+                                                            "Time left":"""=IF(O40 + TIMEVALUE(P40) > NOW(), INT(O40 + TIMEVALUE(P40) - NOW()) & " days", "Closed")""",
                                                             "link": link_href
                                                         }
                                                         print(event_data)
@@ -254,10 +255,9 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                         extracted_data.append(event_data) 
                     except Exception as e:
                         traceback.print_exc() 
-                        
                                         
 
-                if page_no == max_page:
+                if page_no == max_page or page_no == 10:
                     break
                 else:
                     next_button = WebDriverWait(driver, 10).until(
@@ -297,20 +297,29 @@ def gem():
     try:
         count = 0 
         threads = []
-        MINISTRY_list = [["MINISTRY OF HOME AFFAIRS",["ASSAM RIFLES","CENTRAL RESERVE POLICE FORCE","BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE","NATIONAL SECURITY GUARD","INDO TIBETAN BORDER POLICE"]]]
-        MINISTRY_list = [["MINISTRY OF HOME AFFAIRS",["CENTRAL RESERVE POLICE FORCE"]]]
+        MINISTRY_list = [
+            ["MINISTRY OF COMMUNICATIONS", ['']],
+            ["MINISTRY OF HOUSING & URBAN AFFAIRS", ["HINDUSTAN STEELWORKS CONSTRUCTION LIMITED"]],
+            ["MINISTRY OF POWER", ["NTPC LIMITED"]],
+            ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN AIR FORCE", "INDIAN NAVY", "INDIAN ARMY"]],
+            ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
+            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES", "CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE", "CENTRAL INDUSTRIAL SECURITY FORCE", "NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]]
+        ]
+
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
             Organization_name=MINISTRY[1]
-            count 
             threading_filename = os.path.join(os.path.dirname(__file__), 'db', "gem_bid_id_ministry",f"{count}.json")
             t = threading.Thread(target=gem_funtion, args=(threading_filename,ministry_name,Organization_name))
             t.start()
             threads.append(t)
-            count =count  + 1 
+            count = count  + 1 
             if count == 5:
                 for t in threads:
-                    t.join()  
+                    t.join()
+                count = 0
+                
     except:
         traceback.print_exc() 
 
