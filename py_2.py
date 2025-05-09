@@ -207,7 +207,6 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                                                         data = dict(zip(headers, row))
                                                         # "Consignee Reporting": data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").strip(),
                                                         event_data = {
-                                                            "matches":'',
                                                             "dateOfSearch": today.strftime("%d-%b-%Y"),
                                                             "GEM-ID": bid_title.text,
                                                             "title": title,
@@ -236,7 +235,6 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                             print(f"Error downloading or reading file from {link_href}: {download_error}")
 
                             event_data = {
-                                "matches":'',
                                 "dateOfSearch":today.strftime("%d-%b-%Y"),
                                 "website": 'GEM',
                                 "GEM-ID":bid_title.text,

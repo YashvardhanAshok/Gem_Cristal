@@ -166,7 +166,7 @@ def gem(SearchKeywords,product):
                                                                 data = dict(zip(headers, row))
                                                                 
                                                                 event_data = {
-                                                                    "matches":match,
+                                                                    "matches":match,z
                                                                     "dateOfSearch": today.strftime("%d-%b-%Y"),
                                                                     "elementPut": element,
                                                                     "GEM-ID": bid_title.text,
