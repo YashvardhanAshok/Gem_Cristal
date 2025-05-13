@@ -12,6 +12,16 @@ import os
 from datetime import date
 from datetime import datetime as ds
 
+import random
+import string
+
+def generate_random_id(length=8):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choices(characters, k=length))
+
+random_id = generate_random_id()
+print("Random ID:", random_id)
+
 today = date.today()
 
 from datetime import datetime as datetime_udate
@@ -49,6 +59,7 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
     ministry_dropdown = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-ministry-container']"))
     )
+    
     ministry_dropdown.click()
     sleep(2)
     
@@ -60,11 +71,13 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
 
     json_dir = os.path.join(os.getcwd(), 'db', 'json')
     os.makedirs(json_dir, exist_ok=True)
-    file_Pail = os.path.join(json_dir, ministry_name + '.json')
+    random_id = generate_random_id()
+
+    file_Pail = os.path.join(json_dir,random_id + " " + ministry_name + '.json')
     sleep(2)
 
     for org_name in Organization_name:
-        string_name_file = ministry_name + org_name
+        string_name_file = ministry_name + " " + org_name
         
         if not os.path.exists(threading_filename):
             with open(threading_filename, "w") as f:
@@ -108,6 +121,9 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                     EC.presence_of_all_elements_located((By.CLASS_NAME, 'card')))
 
                 for card in card_elements:
+                    driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
+                    # Optionally wait a bit to let the scroll complete or element render
+                    time.sleep(0.5)
                     try:
                         bid_title1 = card.find_element(By.CLASS_NAME, 'bid_no_hover')
                         bid_title = bid_title1
@@ -140,9 +156,7 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                                 if text.startswith(bid_title.text):
                                     title=titles.append(text)
 
-                        json_dir = os.path.join(os.getcwd(), 'db', 'json')
-                        os.makedirs(json_dir, exist_ok=True)
-                        file_Pail = os.path.join(json_dir, ministry_name + '.json')
+
 
                         try:
                             response = requests.get(link_href, stream=True)
@@ -185,17 +199,20 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                                         Tender_value = None
                                         for page in pdf.pages:
                                             tables = page.extract_tables()
-
                                             for section in tables:
-                                                for row in section:
-                                                    key = row[0]
-                                                    value = row[1]
-                                                    if key and 'EMD Amount' in key:
-                                                        emd_amount = float(value)
-                                                        Tender_value = emd_amount * 50
-                                                    elif key and 'ePBG Percentage' in key:
-                                                        epbg_percentage = value
-
+                                                try:
+                                                    
+                                                    for row in section:
+                                                        key = row[0]
+                                                        value = row[1]
+                                                        if key and 'EMD Amount' in key:
+                                                            emd_amount = float(value)
+                                                            Tender_value = emd_amount * 50
+                                                        elif key and 'ePBG Percentage' in key:
+                                                            epbg_percentage = value
+                                                except:
+                                                    print('error in EMD Amount')
+                                                    
 
                                         for page in pdf.pages:
                                             tables = page.extract_tables()
@@ -205,27 +222,48 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                                                     for row in table[1:]:
                                                         row = row + [""] * (len(headers) - len(row))
                                                         data = dict(zip(headers, row))
-                                                        # "Consignee Reporting": data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").strip(),
-                                                        event_data = {
-                                                            "dateOfSearch": today.strftime("%d-%b-%Y"),
-                                                            "GEM-ID": bid_title.text,
-                                                            "title": title,
-                                                            "Consignee Reporting": (data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "") or "").strip(),
-                                                            "Address":  (data.get(next((h for h in headers if "Address" in (h or "")), ""), "") or "").strip(),
-                                                            "Quantity": (data.get(next((h for h in headers if "Quantity" in (h or "")), ""), "") or "").strip(),
-                                                            "Delivery Days": (data.get(next((h for h in headers if "Delivery Days" in (h or "")), ""), "") or "").strip(),
-                                                            "EMD Amount": emd_amount,
-                                                            "Tender_value": Tender_value,
-                                                            "ePBG Percentage": epbg_percentage,
-                                                            "Opening Date": start_date,
-                                                            "Opening Time": start_date_time,
-                                                            "Closing Date": end_date,
-                                                            "Closing Time": end_date_time,
-                                                            "Time left":"""=IF(O40 + TIMEVALUE(P40) > NOW(), INT(O40 + TIMEVALUE(P40) - NOW()) & " days", "Closed")""",
-                                                            "link": link_href
-                                                        }
-                                                        print(event_data)
+                                                        
+                                                        
+                                                        event_data = {}
+                                                        event_data["DATE OF SEARCH"]= today.strftime("%d-%b-%Y")
+                                                        event_data["TENDER ID"]= bid_title.text
+                                                        event_data["org_name"] = org_name
+                                                        # event_data["elementPut"]= element
+                                                        event_data["ITEM DESCRIPTION"]= title
+                                                        try:
+                                                            event_data["Quantity"]= data.get(next((h for h in headers if "Quantity" in (h or "")), ""), "").strip()
+                                                        except:
+                                                            pass
+                                                        event_data["START DATE"]= start_date
+                                                        event_data["END DATE"]= end_date
+                                                        event_data["END Time"]= end_date_time
+                                                        event_data["DAY LEFT"]= end_date_time
+
+                                                        event_data["EMD AMOUNT"]= emd_amount
+                                                        event_data["TENDER VALUE"]= Tender_value
+                                                        
+                                                        try:
+                                                            event_data["Consignee Reporting"]= data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").strip()
+                                                        except:
+                                                            pass
+                                                        try:
+                                                            event_data["Address"]= data.get(next((h for h in headers if "Address" in (h or "")), ""), "").strip()
+                                                        except:
+                                                            pass
+
+                                                        try:
+                                                            # event_data["Delivery Days"]= data.get(next((h for h in headers if "Delivery Days" in (h or "")), ""), "").strip()
+                                                            pass
+                                                        except:
+                                                            pass
+                                                        
+                                                        # event_data["ePBG Percentage"]= epbg_percentage
+                                                        # event_data["Opening Time"]= start_date_time
+                                                        # event_data["link"]= link_href
+                                                        
                                                         extracted_data.append(event_data)
+
+                                                        
 
                             else:
                                 print(f"Link is not a downloadable file or not found: {link_href}")
@@ -234,28 +272,11 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                             
                             print(f"Error downloading or reading file from {link_href}: {download_error}")
 
-                            event_data = {
-                                "dateOfSearch":today.strftime("%d-%b-%Y"),
-                                "website": 'GEM',
-                                "GEM-ID":bid_title.text,
-                                "title": title,
-                                "Opening Date": start_date,
-                                "Opening Time": start_date_time,
-                                "Closing Date": end_date,
-                                "Closing Time": end_date_time,
-                                "link": link_href,
-                                "Consignee Reporting": '',
-                                "Address": '',
-                                "Quantity": '',
-                                "Delivery Days": ''
-                            }
-
-                        extracted_data.append(event_data) 
                     except Exception as e:
                         traceback.print_exc() 
                                         
 
-                if page_no == max_page or page_no == 10:
+                if page_no == max_page or page_no == 5:
                     break
                 else:
                     next_button = WebDriverWait(driver, 10).until(
@@ -263,6 +284,9 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                     )
                     next_button.click()
 
+
+
+                
         except Exception as e:
             print("An error occurred:", str(e))
             traceback.print_exc() 
@@ -300,14 +324,17 @@ def gem():
             ["MINISTRY OF HOUSING & URBAN AFFAIRS", ["HINDUSTAN STEELWORKS CONSTRUCTION LIMITED"]],
             ["MINISTRY OF POWER", ["NTPC LIMITED"]],
             ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
-            ["MINISTRY OF DEFENCE", ["INDIAN AIR FORCE", "INDIAN NAVY", "INDIAN ARMY"]],
             ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
-            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES", "CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE", "CENTRAL INDUSTRIAL SECURITY FORCE", "NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]]
-        ]
+            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES", "CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE",]],
+            ["MINISTRY OF HOME AFFAIRS", [ "CENTRAL INDUSTRIAL SECURITY FORCE","NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN AIR FORCE"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],]
 
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
             Organization_name=MINISTRY[1]
+            
             threading_filename = os.path.join(os.path.dirname(__file__), 'db', "gem_bid_id_ministry",f"{count}.json")
             t = threading.Thread(target=gem_funtion, args=(threading_filename,ministry_name,Organization_name))
             t.start()

@@ -67,6 +67,9 @@ def gem(SearchKeywords,product):
                         FIND_T_arry = FIND_T_arry + "   " + element +'\n'
 
                         for card in card_elements:
+                            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
+                            # Optionally wait a bit to let the scroll complete or element render
+                            time.sleep(0.5)
                             try:
                                 bid_title1 = card.find_element(By.CLASS_NAME, 'bid_no_hover')
                                 bid_title = bid_title1
@@ -165,25 +168,44 @@ def gem(SearchKeywords,product):
                                                                 row = row + [""] * (len(headers) - len(row))
                                                                 data = dict(zip(headers, row))
                                                                 
-                                                                event_data = {
-                                                                    "matches":match,z
-                                                                    "dateOfSearch": today.strftime("%d-%b-%Y"),
-                                                                    "elementPut": element,
-                                                                    "GEM-ID": bid_title.text,
-                                                                    "title": title,
-                                                                    "Consignee Reporting": data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").strip(),
-                                                                    "Address": data.get(next((h for h in headers if "Address" in (h or "")), ""), "").strip(),
-                                                                    "Quantity": data.get(next((h for h in headers if "Quantity" in (h or "")), ""), "").strip(),
-                                                                    "Delivery Days": data.get(next((h for h in headers if "Delivery Days" in (h or "")), ""), "").strip(),
-                                                                    "EMD Amount": emd_amount,
-                                                                    "Tender_value": Tender_value,
-                                                                    "ePBG Percentage": epbg_percentage,
-                                                                    "Opening Date": start_date,
-                                                                    "Opening Time": start_date_time,
-                                                                    "Closing Date": end_date,
-                                                                    "Closing Time": end_date_time,
-                                                                    "link": link_href
-                                                                }
+                                                                event_data = {}
+                                                                event_data["DATE OF SEARCH"]= today.strftime("%d-%b-%Y")
+                                                                
+                                                                event_data["matches"] = match
+                                                                event_data["TENDER ID"]= bid_title.text
+                                                                # event_data["elementPut"]= element
+                                                                event_data["ITEM DESCRIPTION"]= title
+                                                                try:
+                                                                    event_data["Quantity"]= data.get(next((h for h in headers if "Quantity" in (h or "")), ""), "").strip()
+                                                                except:
+                                                                    pass
+                                                                
+                                                                event_data["START DATE"]= start_date
+                                                                event_data["END DATE"]= end_date
+                                                                event_data["END Time"]= end_date_time
+                                                                event_data["DAY LEFT"]= end_date_time
+
+                                                                event_data["EMD AMOUNT"]= emd_amount
+                                                                event_data["TENDER VALUE"]= Tender_value
+                                                                
+                                                                try:
+                                                                    event_data["Consignee Reporting"]= data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").strip()
+                                                                except:
+                                                                    pass
+                                                                try:
+                                                                    event_data["Address"]= data.get(next((h for h in headers if "Address" in (h or "")), ""), "").strip()
+                                                                except:
+                                                                    pass
+
+                                                                try:
+                                                                    # event_data["Delivery Days"]= data.get(next((h for h in headers if "Delivery Days" in (h or "")), ""), "").strip()
+                                                                    pass
+                                                                except:
+                                                                    pass
+                                                                
+                                                                # event_data["ePBG Percentage"]= epbg_percentage
+                                                                # event_data["Opening Time"]= start_date_time
+                                                                # event_data["link"]= link_href
                                                                 
                                                                 extracted_data.append(event_data)
 
@@ -192,25 +214,6 @@ def gem(SearchKeywords,product):
                                 except Exception as download_error:
                                     print(f"Error downloading or reading file from {link_href}: {download_error}")
 
-                                    event_data = {
-                                        "matches":match,
-                                        "dateOfSearch":today.strftime("%d-%b-%Y"),
-                                        "website": 'GEM',
-                                        "elementPut":element,
-                                        "GEM-ID":bid_title.text,
-                                        "title": title,
-                                        "Opening Date": start_date,
-                                        "Opening Time": start_date_time,
-                                        "Closing Date": end_date,
-                                        "Closing Time": end_date_time,
-                                        "link": link_href,
-                                        "Consignee Reporting": '',
-                                        "Address": '',
-                                        "Quantity": '',
-                                        "Delivery Days": ''
-                                    }
-
-                                extracted_data.append(event_data) 
                             except Exception as e:
                                 log_arry= log_arry + "Error found in card:" + element+'\n'
                                 
@@ -509,6 +512,159 @@ product = [
   "Software",
   "Software Defined Radio",
   "Cyber Forensics Software"
-]]
+],
+# "PRE-ENGINEERED BUILDING": 
+[
+    "Prefab shelters with puf panel of size 7.620 m x 13.271 m",
+    "LGSF Building",
+    "Inflatable Shelters",
+    "Porta Cabin",
+    "Portable houses",
+    "Portable Kitchen",
+    "PPGI Sheets",
+    "CGI Sheet"
+],
+# "ELECTRICAL": 
+    [
+    "Led Bulbs","Tubes",
+    "Street Light",
+    "Flood Light",
+    "Gyser",
+    "Room Heater",
+    "XLPE Cables",
+    "All Types of Wire and Cables",
+    "MCB",
+    "MCCB",
+    "Ac static watthour meters-energy meter",
+    "Switch fuse unit","Change over Switch",
+    "Decorative Street Light",
+    "Decorative Bollard",
+    "water cooler",
+    "Lighting Arrestor"
+],
+# "COMMERCIAL KITCHEN EQUIPMENT": 
+    [
+    "Domestic casserole",
+    "Bain marie",
+    "Wet grinder 5",
+    "Dough kneader 15kg",
+    "water cooler",
+    "Commercial Mixer",
+    "Vegetable Cutter",
+    "Electric milk boiler",
+    "Mild Steel LPG Barbecues"," Tandoor, Height 481-500 Millimeter",
+    "Large compartmental stainless steel tiffin",
+    "New lpg cooking appliances",
+    "Air curtain",
+    "Rice boiler",
+    "Chapati Warmer",
+    "Roti Making Machine Auto matic "," Semi Automatic",
+    "Meat Cutting Machine",
+    "Idli Steamer",
+    "SS Thermos"
+],
+# "SOLAR": 
+    [
+    "Solar PV Panel",
+    "Solar PV Plant",
+    "2 V Solar Battery cells",
+    "Solar inverter",
+    "Solar Tublar Batteries",
+    "Solar Street Light all Type",
+    "Solar water Heater",
+    "Solar water pump"
+],
+# "WATER TREATMENT": 
+    [
+    "All Types of Commercial RO PLANTS",
+    "STP",
+    "WTP"
+],
+# "SECURITY SURVEILLANCE": 
+    [
+    "CCTV",
+    "Body Worn Camera",
+    "Anti climb Fence",
+    "Electric Fence",
+    "Chainlink Fence",
+    "Picket Steel",
+    "Barbed Wire",
+    "Punched Tape concertina Coil PTCC",
+    "UAV",
+    "Nano Uav",
+    "AntI Drone system",
+    "High Intensity Light Infrared beam",
+    "Handheld GPS",
+    "Convex Security Mirror"
+],
+# "ELECTRO OPTICS": 
+    [
+    "Hand held Thermal Imager",
+    "Weapon Sites",
+    "PNVG",
+    "Lorros",
+    "Clip On Weapon Sites",
+    "Multi Function Laser Aiming System"
+],
+# "TACTICAL ITEMS": 
+    [
+    "Miltary Rain Poncho",
+    "Ghilly Suit",
+    "Jungle Boots",
+    "Rucksack Bags",
+    "3D Multi Spectral Camo Vehicle Cover",
+    "Shooting Range",
+    "Weapon Support system",
+    "Long Range Acoustic Hailing Device",
+    "3d Multi Spectral Camo Dress",
+    "Bola wrap Remote Restrain device"
+],
+# "MATERIAL "," CONSTRUCTION EQUIPMENT": 
+    [
+    "JCB Bacholoader",
+    "Skid steer Loader",
+    "Cranes",
+    "Forklifts"
+],
+# "SWACHH BHARAT ITEMS": 
+    [
+    "Waste Management Plants",
+    "Road Sweeping Machines",
+    "Sewer Suction Machines",
+    "Dustbin "," SS","FRP",
+    "Commercial Vaccum Cleaner",
+    "Sanitary Napkins Incinetator Machine with Smoke ControlUnit",
+    "SANITARY NAPKIN VENDING MACHINE"
+],
+# "ENERGY SOLUTIONS": 
+    [
+    "DG SETS",
+    "Automobile Batteries other batteries",
+    "Fuel cell genrators",
+    "Inverters"
+],
+# "AMC SERVICES": 
+    [
+    "Amc of DG Sets and Transformer",
+    "AMC OF COMMERCIAL KITCHEN EQUIPMENT",
+    "AMC OF Gym EQUIPMENT"
+],
+# "GYM EQUIPMENT": 
+    [
+    "ALL Types of commercial Gym Equipment",
+    "Outdoor Gym"
+],
+# "COMPUTER "," ADVANCE SECURITY SOLUTIONS": 
+    [
+    "Computer and peripherals",
+    "Data Management solutions",
+    "Access Control Solutions",
+    "Cyber Security Solutions",
+    "Video Survelliance & Analytics Solutions"
+]
+]
+
+SearchKeywords,product = [ 
+ [ "Electric Wires/Cable" ]]
 
 gem(SearchKeywords,product)
