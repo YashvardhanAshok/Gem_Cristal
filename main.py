@@ -1,42 +1,26 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import traceback
-from selenium.common.exceptions import NoSuchElementException
 import time
 import json
 import os
-from datetime import date
 from datetime import datetime as ds
-
-import random
-import string
-
-def generate_random_id(length=8):
-    characters = string.ascii_letters + string.digits
-    return ''.join(random.choices(characters, k=length))
-
-random_id = generate_random_id()
-print("Random ID:", random_id)
-
-today = date.today()
-
-from datetime import datetime as datetime_udate
 from time import sleep
 
 import os
 import requests
 from urllib.parse import urlparse
 import ntpath
-import fitz  
 import pdfplumber
 
 import requests
 from urllib.parse import urlparse
 import re
+from datetime import date
+today = date.today()
 
 def clean_text(text):
     if text:
@@ -45,39 +29,20 @@ def clean_text(text):
         return text
     return ''
 
-
-def gem_funtion(threading_filename,ministry_name,Organization_name):
+def gem_funtion(threading_filename,ministry_name,elements_list):
     
     driver = webdriver.Edge()
-    driver.get('https://bidplus.gem.gov.in/advance-search')
-    sleep(0.1)
-
-    ministry_tab = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'ministry-tab')))
-    ministry_tab.click()
-    sleep(5)
-    
-    ministry_dropdown = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-ministry-container']"))
-    )
-    
-    ministry_dropdown.click()
+    driver.get('https://bidplus.gem.gov.in/all-bids')
     sleep(2)
-    
-    ministry_search__field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'select2-search__field')))
-    ministry_search__field.clear()
-    
-    ministry_search__field.send_keys(ministry_name)
-    ministry_search__field.send_keys(Keys.RETURN)
-
+ 
     json_dir = os.path.join(os.getcwd(), 'db', 'json')
     os.makedirs(json_dir, exist_ok=True)
-    random_id = generate_random_id()
 
-    file_Pail = os.path.join(json_dir,random_id + " " + ministry_name + '.json')
+    file_Pail = os.path.join(json_dir + ministry_name + '.json')
     sleep(2)
 
-    for org_name in Organization_name:
-        string_name_file = ministry_name + " " + org_name
+    for element in elements_list:
+        string_name_file = element
         
         if not os.path.exists(threading_filename):
             with open(threading_filename, "w") as f:
@@ -86,24 +51,12 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
         with open(threading_filename, "r") as f:
             gem_ids_json = json.load(f)
             gem_ids = gem_ids_json.get(string_name_file, [])
-        #Organization
-        Organization_dropdown = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-organization-container']"))
-        )
-        Organization_dropdown.click()
-        Organization_search__field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'select2-search__field')))
-        Organization_search__field.clear()
-        Organization_search__field.send_keys(org_name)
-        Organization_search__field.send_keys(Keys.RETURN)
         
-        # surch_bu
-        # Use JavaScript to click the button directly
-        sleep(2)
-        WebDriverWait(driver, 10).until(
-            lambda d: d.execute_script("return typeof searchBid === 'function'")
-        )
-        driver.execute_script("searchBid('ministry-search')")
-        sleep(2)
+        time.sleep(0.1)
+        search = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'searchBid')))
+        search.clear()
+        search.send_keys(element)
+        search.send_keys(Keys.RETURN)
 
         try:
             pagination = driver.find_element(By.ID, "light-pagination")
@@ -114,6 +67,7 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
             extracted_data = []
         except:
             continue
+        
         try:
             for page_no in range(int(max_page)):
                 
@@ -227,8 +181,7 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
                                                         event_data = {}
                                                         event_data["DATE OF SEARCH"]= today.strftime("%d-%b-%Y")
                                                         event_data["TENDER ID"]= bid_title.text
-                                                        event_data["org_name"] = org_name
-                                                        # event_data["elementPut"]= element
+                                                        event_data["elementPut"]= element
                                                         event_data["ITEM DESCRIPTION"]= title
                                                         try:
                                                             event_data["Quantity"]= data.get(next((h for h in headers if "Quantity" in (h or "")), ""), "").strip()
@@ -311,29 +264,23 @@ def gem_funtion(threading_filename,ministry_name,Organization_name):
         with open(threading_filename, "w") as f:
             gem_ids_json[string_name_file] = gem_ids
             json.dump(gem_ids_json, f, indent=2)
+            
         print(gem_ids)
     driver.quit()
     
 import threading
-def gem():
+def Main():
     try:
         count = 0 
         threads = []
-        MINISTRY_list = [
-            ["MINISTRY OF COMMUNICATIONS", ['']],
-            ["MINISTRY OF HOUSING & URBAN AFFAIRS", ["HINDUSTAN STEELWORKS CONSTRUCTION LIMITED"]],
-            ["MINISTRY OF POWER", ["NTPC LIMITED"]],
-            ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
-            ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
-            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES", "CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE","NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]],
-            ["MINISTRY OF DEFENCE", ["INDIAN NAVY","INDIAN ARMY","INDIAN AIR FORCE"]]]
+        MINISTRY_list = []
 
         for MINISTRY in MINISTRY_list: 
-            ministry_name=MINISTRY[0]
-            Organization_name=MINISTRY[1]
+            ministry_name = "Gem"
+            elements = MINISTRY
             
-            threading_filename = os.path.join(os.path.dirname(__file__), 'db', "gem_bid_id_ministry",f"{count}.json")
-            t = threading.Thread(target=gem_funtion, args=(threading_filename,ministry_name,Organization_name))
+            threading_filename = os.path.join(os.path.dirname(__file__), 'db', "Gem_main", "gem_bid_id_ministry",f"{count}.json")
+            t = threading.Thread(target=gem_funtion, args=(threading_filename,ministry_name,elements))
             t.start()
             threads.append(t)
             count = count  + 1 
@@ -347,7 +294,7 @@ def gem():
 
 
 
-gem()
+Main()
 
 
 
