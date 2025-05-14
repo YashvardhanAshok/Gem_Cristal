@@ -1,198 +1,19 @@
 import os
 import json
 import pandas as pd
-product = [
-    # "PRE-ENGINEERED BUILDING": 
-    [
-        "Prefab shelters with puf panel of size 7.620 m x 13.271 m",
-        "LGSF Building",
-        "Inflatable Shelters",
-        "Porta Cabin",
-        "Portable houses",
-        "Portable Kitchen",
-        "PPGI Sheets",
-        "CGI Sheet"
-    ],
-    # "ELECTRICAL": 
-        [
-        "Led Bulbs / Tubes",
-        "Street Light",
-        "Flood Light",
-        "Gyser",
-        "Room Heater",
-        "XLPE Cables",
-        "All Types of Wire and Cables",
-        "MCB",
-        "MCCB",
-        "Ac static watthour meters-energy meter",
-        "Switch fuse unit/Change over Switch",
-        "Decorative Street Light",
-        "Decorative Bollard",
-        "water cooler",
-        "Lighting Arrestor"
-    ],
-    # "COMMERCIAL KITCHEN EQUIPMENT": 
-        [
-        "Domestic casserole",
-        "Bain marie",
-        "Wet grinder 5",
-        "Dough kneader 15kg",
-        "water cooler",
-        "Commercial Mixer",
-        "Vegetable Cutter",
-        "Electric milk boiler",
-        "Mild Steel LPG Barbecues/ Tandoor, Height 481-500 Millimeter",
-        "Large compartmental stainless steel tiffin",
-        "New lpg cooking appliances",
-        "Air curtain",
-        "Rice boiler",
-        "Chapati Warmer",
-        "Roti Making Machine Auto matic / Semi Automatic",
-        "Meat Cutting Machine",
-        "Idli Steamer",
-        "SS Thermos"
-    ],
-    # "SOLAR": 
-        [
-        "Solar PV Panel",
-        "Solar PV Plant",
-        "2 V Solar Battery cells",
-        "Solar inverter",
-        "Solar Tublar Batteries",
-        "Solar Street Light all Type",
-        "Solar water Heater",
-        "Solar water pump"
-    ],
-    # "WATER TREATMENT": 
-        [
-        "All Types of Commercial RO PLANTS",
-        "STP",
-        "WTP"
-    ],
-    # "SECURITY SURVEILLANCE": 
-        [
-        "CCTV",
-        "Body Worn Camera",
-        "Anti climb Fence",
-        "Electric Fence",
-        "Chainlink Fence",
-        "Picket Steel",
-        "Barbed Wire",
-        "Punched Tape concertina Coil PTCC",
-        "UAV",
-        "Nano Uav",
-        "AntI Drone system",
-        "High Intensity Light Infrared beam",
-        "Handheld GPS",
-        "Convex Security Mirror"
-    ],
-    # "ELECTRO OPTICS": 
-        [
-        "Hand held Thermal Imager",
-        "Weapon Sites",
-        "PNVG",
-        "Lorros",
-        "Clip On Weapon Sites",
-        "Multi Function Laser Aiming System"
-    ],
-    # "TACTICAL ITEMS": 
-        [
-        "Miltary Rain Poncho",
-        "Ghilly Suit",
-        "Jungle Boots",
-        "Rucksack Bags",
-        "3D Multi Spectral Camo Vehicle Cover",
-        "Shooting Range",
-        "Weapon Support system",
-        "Long Range Acoustic Hailing Device",
-        "3d Multi Spectral Camo Dress",
-        "Bola wrap Remote Restrain device"
-    ],
-    # "MATERIAL / CONSTRUCTION EQUIPMENT": 
-        [
-        "JCB Bacholoader",
-        "Skid steer Loader",
-        "Cranes",
-        "Forklifts"
-    ],
-    # "SWACHH BHARAT ITEMS": 
-        [
-        "Waste Management Plants",
-        "Road Sweeping Machines",
-        "Sewer Suction Machines",
-        "Dustbin / SS/FRP",
-        "Commercial Vaccum Cleaner",
-        "Sanitary Napkins Incinetator Machine with Smoke ControlUnit",
-        "SANITARY NAPKIN VENDING MACHINE"
-    ],
-    # "ENERGY SOLUTIONS": 
-        [
-        "DG SETS",
-        "Automobile Batteries other batteries",
-        "Fuel cell genrators",
-        "Inverters"
-    ],
-    # "AMC SERVICES": 
-        [
-        "Amc of DG Sets and Transformer",
-        "AMC OF COMMERCIAL KITCHEN EQUIPMENT",
-        "AMC OF Gym EQUIPMENT"
-    ],
-    # "GYM EQUIPMENT": 
-        [
-        "ALL Types of commercial Gym Equipment",
-        "Outdoor Gym"
-    ],
-    # "COMPUTER / ADVANCE SECURITY SOLUTIONS": 
-        [
-        "Computer and peripherals",
-        "Data Management solutions",
-        "Access Control Solutions",
-        "Cyber Security Solutions",
-        "Video Survelliance & Analytics Solutions"
-    ]
-    ]
+import traceback
+product = [['2 V Solar Battery cells', '3D Multi Spectral Camo Vehicle Cover', '3D Printer', '3d Multi Spectral Camo Dress', 'A.C Static Meter', 'ALL Types of commercial Gym Equipment', 'AMC OF COMMERCIAL KITCHEN EQUIPMENT', 'AMC OF Gym EQUIPMENT', 'Ac static watthour meters-energy meter', 'Access Control Solutions', 'Air Freight Shipping', 'Air curtain', 'All Range Hospital Furniture', 'All Types of Commercial RO PLANTS', 'All Types of Wire and Cables', 'Amc Of Ac', 'Amc Of Commercial Kitchen', 'Amc Of Fire Extinguishers', 'Amc Of Generators', 'Amc Of Gym Equipement', 'Amc Of Kitchen Equipement', 'Amc Of Lightning Arrestors', 'Amc Of Ro And IRP', 'Amc Of Solar Power Plant', 'Amc Of Solar Water Heaters', 'Amc Of Transformers', 'Amc of DG Sets and Transformer', 'AntI Drone system', 'Anti climb Fence', 'Automobile Batteries other batteries', 'Bain Marie', 'Bain marie', 'Barbed Wire', 'Battery', 'Body Worn Camera', 'Bola wrap Remote Restrain device', 'Braille Embosser', 'Bricks', 'Bucket Mop Wringer Trolly', 'Butter', 'CCTV', 'CEW (Conducted Electrical Weapon)', 'CGI Sheet', 'Cement','Chainlink Fence', 'Change over Switch', 'Chapati Warmer', 'Clip On Weapon Sites', 'Commercial Mixer', 'Commercial Vaccum Cleaner', 'Computer and peripherals', 'Construction Of Admin Blocks', 'Construction Of Hospital', 'Construction Of Internal Roads', 'Construction Of Klps For Defense', 'Convex Security Mirror', 'Cranes', 'Cyber Forensics Software', 'Cyber Security Solutions', 'DG SETS', 'Data Management solutions', 'Decorative Bollard', 'Decorative Street Light', 'Development Of Infrastructure For Defense', 'Development Of Sewerage Treatement Plant', 'Development Of Water Supply', 'Domestic casserole', 'Dough Kneader', 'Dough kneader 15kg', 'Dry Ration (Rice , Pulses , Sugar , Coffee, Tea)', 'Dustbin', 'Electric Fence', 'Electric Wires/Cable', 'Electric milk boiler', 'FRP', 'FRP Tank', 'Flood Light', 'Flooring', 'Forklifts', 'Fresh Fruits', 'Fresh Vegetable', 'Fuel Cell', 'Fuel cell genrators', 'GPS', 'GPS (Global Positioning System)', 'Ghillie Suits', 'Ghilly Suit', 'Gi Pipe','Gyser', 'HHTI (Hand Held Thermal Imagers)', 'Hand Held Gas Detector', 'Hand held Thermal Imager', 'Handheld GPS', 'Hardware Item', 'Headphones', 'High Intensity Light Infrared beam', 'Honey Sucker / Sewer Cum Jetting Machine', 'Hybrid UPS', 'Idli Steamer', 'Incinerators', 'Inflatable Shelters', 'Inverters', 'JCB Bacholoader', 'Jet Spray', 'Jungle Boots', 'Kunda Gadi', 'LGSF Building', 'Large compartmental stainless steel tiffin', 'Led Bulbs', 'Less Lethal Weapons', 'Lighting Arrestor', 'Lightning Arrestor', 'Long Range Acoustic Hailing Device', 'Lorros', 'MCB', 'MCCB', 'Meat Cutting Machine', 'Mild Steel LPG Barbecues', 'Milk', 'Milk Boiler', 'Miltary Rain Poncho', 'Miniature Circuit Breaker Switches', 'Monitor', 'Multi Function Laser Aiming System', 'Nano Uav', 'New lpg cooking appliances', 'Oil', 'Online UPS', 'Outdoor Gym', 'Oven', 'PNVG', 'PPGI Sheets','Patient Bed Fowler', 'Patient Care Mattress', 'Picket Steel', 'Pickup Truck', 'Plotter', 'Plywood', 'Porta Cabin', 'Portable Kitchen', 'Portable houses', 'Poultry Product (Chicken, Egg , Mutton)', 'Ppgi Sheet', 'Prefab shelters with puf panel of size 7.620 m x 13.271 m', 'Printer', 'Projector', 'Puff Cabin', 'Puff Shelter', 'Punched Tape concertina Coil PTCC', 'RO (Reverse Osmosis)', 'Remote Restraint Device', 'Rice Boiler', 'Rice boiler', 'Road Sweeping Machines', 'Robotics', 'Room Heater', 'Roti Making Machine', 'Roti Making Machine Auto matic', 'Rucksack Bags', 'SANITARY NAPKIN VENDING MACHINE', 'SS', 'SS Thermos', 'STP', 'STP (Sewage Treatment Plants)', 'Sand', 'Sanitary Items', 'Sanitary Napkins Incinetator Machine with Smoke ControlUnit', 'Satellite Tracker', 'Sea Food (Fish)', 'Search Light', 'Sedan / SUVS', 'Semi Automatic', 'Sewer Suction Machines', 'Shooting Range', 'Skid steer Loader', 'Software','Software Defined Radio', 'Solar Battery', 'Solar Lantern', 'Solar PV Panel', 'Solar PV Plant', 'Solar Power Plant', 'Solar Street Light', 'Solar Street Light all Type', 'Solar Tublar Batteries', 'Solar Water Heater', 'Solar inverter', 'Solar water Heater', 'Solar water pump', 'Speakers', 'Street Light', 'Switch fuse unit', 'Tablet', 'Tandoor', 'Tandoor, Height 481-500 Millimeter', 'Tubes', 'UAV', 'Under Water Torch', 'Unmanned Aerial Vehicle', 'Vaccum Cleaner', 'Vegetable Cutter', 'Video Survelliance & Analytics Solutions', 'WTP', 'Walkie Talkie', 'Waste Management', 'Waste Management Plants', 'Water Bowser', 'Water Cooling', 'Water Dispenser', 'Water Tanker', 'Weapon Sight', 'Weapon Sites', 'Weapon Support system', 'Wet Grinder', 'Wet grinder 5', 'Wheel Barrow', 'X-ray Machine', 'XLPE Cables', 'water cooler']]
 
-# filter data true and False 
 def json_fexer(MINISTRY_name):
-    product = [
-      ["Electric Cable",'Electric Wires', "A.C Static Meter", "Lightning Arrestor", "Miniature Circuit Breaker Switches"],
-      ["Solar Street Light", "Solar Power Plant", "Solar Water Heater", "Solar Lantern", "Solar Battery"],
-      ["Roti Making Machine", "Milk Boiler", "Dough Kneader", "Bain Marie", "Commercial Mixer", "Wet Grinder", "Vegetable Cutter", "Rice Boiler", "Idli Steamer", "Oven", "Tandoor", "Water Dispenser", "Water Cooling"],
-      ["Hand Held Gas Detector", "Under Water Torch"],
-      ["Fuel Cell"],
-      ["Ppgi Sheet", "Plywood", "Puff Shelter", "Puff Cabin", "Gi Pipe", "Cement", "Bricks", "Sand", "Sanitary Items", "Hardware Item", "Flooring"],
-      ["Online UPS", "Hybrid UPS"],
-      ["Ghillie Suits"],
-      ["X-ray Machine", "Patient Bed Fowler", "All Range Hospital Furniture", "Patient Care Mattress"],
-      ["Under Water Torch"],
-      ["Rucksack Bags"],
-      ["Honey Sucker / Sewer Cum Jetting Machine", "Jet Spray", "Vaccum Cleaner", "Wheel Barrow", "Incinerators", "Dustbin", "FRP Tank", "Bucket Mop Wringer Trolly"],
-      ["RO (Reverse Osmosis)", "STP (Sewage Treatment Plants)", "Battery"],
-      ["Less Lethal Weapons", "CEW (Conducted Electrical Weapon)", "Remote Restraint Device", "HHTI (Hand Held Thermal Imagers)", "Weapon Sight", "Search Light", "GPS (Global Positioning System)", "Satellite Tracker", "Unmanned Aerial Vehicle", "Robotics"],
-      ["Monitor", "Printer", "Speakers", "Headphones", "Projector", "GPS", "Plotter", "Braille Embosser", "3D Printer", "Tablet", "Walkie Talkie", "Software", "Software Defined Radio", "Cyber Forensics Software"]
-    ]
-    
-
-    # Flatten product list
     flat_products = [item.lower() for sublist in product for item in sublist]
-
-    # Construct path to JSON file
     json_path = os.path.join(os.path.dirname(__file__), 'db', 'json', f'{MINISTRY_name}.json')
-    print(f"Reading: {json_path}")
-
-    # Load data
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
-
-    # Annotate with match info
     for item in data:
         title = item.get("ITEM DESCRIPTION", "").lower()
         matches = [prod for prod in flat_products if prod in title]
         item["matches"] = bool(matches)
         item["matched_products"] = matches
-
-    # Save updated data
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     print("Updated JSON written with match information.")
@@ -207,8 +28,6 @@ def xl_file(MINISTRY_name):
 
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
-
-    # Group data by title
     grouped = defaultdict(list)
     for entry in data:
         grouped[entry['ITEM DESCRIPTION']].append(entry)
@@ -253,7 +72,6 @@ MINISTRY_list = ['9ZRLmmxP MINISTRY OF COMMUNICATIONS'
 ,'WBdiDTzq MINISTRY OF HEALTH AND FAMILY WELFARE']
 
 MINISTRY_list =['combined']
-import traceback
 for MINISTRY in MINISTRY_list: 
     try:
         json_fexer(MINISTRY)
