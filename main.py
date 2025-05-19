@@ -29,7 +29,9 @@ def clean_text(text):
         return text
     return ''
 
+xl_count = 2
 def gem_find(driver,card_elements , card, gem_ids, element):
+    global xl_count
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
     time.sleep(0.5)
     try:
@@ -51,6 +53,18 @@ def gem_find(driver,card_elements , card, gem_ids, element):
         closing_date_parts = end_date.split(" ")
         end_date = convert_date_format(closing_date_parts[0])
         end_date_time = closing_date_parts[1] + " " + closing_date_parts[2]
+        
+        
+        try:
+            quantity_element = card.find_element(By.XPATH, ".//div[contains(@class, 'col-md-4')]//div[contains(text(), 'Quantity')]")
+            quantity_text = quantity_element.text.strip()
+            if "Quantity:" in quantity_text:
+                quantity = quantity_text.split("Quantity:")[-1].strip()
+            else:
+                quantity = 0
+
+        except Exception as e:
+            quantity = 0
 
         try:
             department_div = card.find_element(By.CSS_SELECTOR, "div.col-md-5 > div:nth-child(2)")
@@ -115,6 +129,9 @@ def gem_find(driver,card_elements , card, gem_ids, element):
                                         key = row[0]
                                         value = row[1]
                                         
+                                        if key and 'Total Quantity' in key and value:
+                                            Total_Quantity = value
+                                        
                                         if key and 'Item Category' in key and value:
                                             Item_Category = value
                                         
@@ -126,6 +143,9 @@ def gem_find(driver,card_elements , card, gem_ids, element):
                                 except:
                                     print('error in EMD Amount')
 
+                        event_data = {}
+                        Consignee_Reporting_list = []
+                        Address_list = []
                         for page in pdf.pages:
                             tables = page.extract_tables()
                             for table in tables:
@@ -134,57 +154,60 @@ def gem_find(driver,card_elements , card, gem_ids, element):
                                     for row in table[1:]:
                                         row = row + [""] * (len(headers) - len(row))
                                         data = dict(zip(headers, row))
-
-                                        event_data = {}
-                                        try:
-                                            event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
-                                        except:
-                                            pass
-                                        try:
-                                            event_data["TENDER ID"] = bid_title.text
-                                        except:
-                                            pass
-                                        try:
-                                            event_data["elementPut"] = element
-                                        except:
-                                            pass
-                                        try:
-                                            event_data["ITEM DESCRIPTION"] = title
-                                        except:
-                                            try:
-                                                event_data["ITEM DESCRIPTION"] = Item_Category
-                                            except:
-                                                pass
-                                        try:
-                                            event_data["QTY"] = data.get(next((h for h in headers if "Quantity" in (h or "")), ""), "").strip()
-                                        except:
-                                            pass
-                                        
-                                        event_data["START DATE"] = start_date
-                                        event_data["END DATE"] = end_date
-                                        event_data["END Time"] = end_date_time
-                                        event_data["DAY LEFT"] = end_date_time
-                                        event_data["EMD AMOUNT"] = emd_amount
-                                        event_data["TENDER VALUE"] = Tender_value
                                         
                                         try:
-                                            event_data["ITEM CATEGORY"] = Item_Category
-                                        except:
-                                            pass
-                                        
-                                        try:
-                                            event_data["Consignee Reporting"] = data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").replace("*", "").strip()
-                                        except:
-                                            pass
-                                        try:
-                                            event_data["ADDRESS"] = data.get(next((h for h in headers if "Address" in (h or "")), ""), "").replace("*", "").strip()
+                                            consignee_value = data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").replace("*", "").strip()
+                                            if consignee_value and consignee_value not in Consignee_Reporting_list:
+                                                Consignee_Reporting_list.append(consignee_value)
                                         except:
                                             pass
 
-                                        event_data["MINISTRY"] = department_address_parts[0]
-                                        event_data["DEPARTMENT"] = department_address_parts[1]
+                                        try:
+                                            address_value = data.get(next((h for h in headers if "Address" in (h or "")), ""), "").replace("*", "").strip()
+                                            if address_value and address_value not in Address_list:
+                                                Address_list.append(address_value)
+                                        except:
+                                            pass
+                                        
+                                        
 
-                                        return event_data
+                        event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
+                        event_data["TENDER ID"] = bid_title.text
+                        event_data["elementPut"] = element
+                        try:
+                            event_data["ITEM DESCRIPTION"] = title
+                        except:
+                            try:
+                                event_data["ITEM DESCRIPTION"] = Item_Category
+                            except:
+                                pass
+                        try:
+                            if quantity == 0:
+                                event_data["QTY"] = Total_Quantity
+                            else:
+                                event_data["QTY"] = quantity
+                                
+                        except:
+                            pass
+                        
+                        event_data["START DATE"] = start_date
+                        event_data["END DATE"] = end_date
+                        event_data["END Time"] = end_date_time
+                        event_data["DAY LEFT"] = """=IF((INDIRECT("H"&ROW()) + INDIRECT("I"&ROW())) - NOW() <= 0, "CLOSED", INT((INDIRECT("H"&ROW()) + INDIRECT("I"&ROW())) - NOW()) & " days")"""
+                        event_data["EMD AMOUNT"] = emd_amount
+                        event_data["TENDER VALUE"] = Tender_value
+                        try:
+                            event_data["ITEM CATEGORY"] = Item_Category
+                        except:
+                            pass
+                        
+                        event_data["Consignee Reporting"] = Consignee_Reporting_list 
+                        event_data["ADDRESS"] = Address_list
+
+                        event_data["MINISTRY"] = department_address_parts[0]
+                        event_data["DEPARTMENT"] = department_address_parts[1]
+
+                        return event_data
             else:
                 print(f"Link is not a downloadable file or not found: {link_href}")
         except Exception as download_error:
@@ -251,7 +274,7 @@ def gem_funtion(threading_filename,file_Pail ,elements_list):
                         extracted_data.append(json_data)
                 
 
-                if page_no == max_page or page_no == 5:
+                if page_no == max_page or page_no == 10:
                     break
                 else:
                     try:
@@ -293,10 +316,12 @@ def gem_funtion(threading_filename,file_Pail ,elements_list):
 import threading
 def Main():
     try:
+        
         count = 0 
         threads = []
         
         item_list = [['2 V Solar Battery cells', '3D Multi Spectral Camo Vehicle Cover', '3D Printer', '3d Multi Spectral Camo Dress', 'A.C Static Meter', 'ALL Types of commercial Gym Equipment', 'AMC OF COMMERCIAL KITCHEN EQUIPMENT', 'AMC OF Gym EQUIPMENT', 'Ac static watthour meters-energy meter', 'Access Control Solutions', 'Air Freight Shipping', 'Air curtain', 'All Range Hospital Furniture', 'All Types of Commercial RO PLANTS', 'All Types of Wire and Cables', 'Amc Of Ac', 'Amc Of Commercial Kitchen', 'Amc Of Fire Extinguishers', 'Amc Of Generators', 'Amc Of Gym Equipement', 'Amc Of Kitchen Equipement', 'Amc Of Lightning Arrestors', 'Amc Of Ro And IRP', 'Amc Of Solar Power Plant', 'Amc Of Solar Water Heaters', 'Amc Of Transformers', 'Amc of DG Sets and Transformer', 'AntI Drone system', 'Anti climb Fence', 'Automobile Batteries other batteries', 'Bain Marie', 'Bain marie', 'Barbed Wire', 'Battery', 'Body Worn Camera', 'Bola wrap Remote Restrain device', 'Braille Embosser', 'Bricks', 'Bucket Mop Wringer Trolly', 'Butter', 'CCTV', 'CEW (Conducted Electrical Weapon)', 'CGI Sheet', 'Cement','Chainlink Fence', 'Change over Switch', 'Chapati Warmer', 'Clip On Weapon Sites', 'Commercial Mixer', 'Commercial Vaccum Cleaner', 'Computer and peripherals', 'Construction Of Admin Blocks', 'Construction Of Hospital', 'Construction Of Internal Roads', 'Construction Of Klps For Defense', 'Convex Security Mirror', 'Cranes', 'Cyber Forensics Software', 'Cyber Security Solutions', 'DG SETS', 'Data Management solutions', 'Decorative Bollard', 'Decorative Street Light', 'Development Of Infrastructure For Defense', 'Development Of Sewerage Treatement Plant', 'Development Of Water Supply', 'Domestic casserole', 'Dough Kneader', 'Dough kneader 15kg', 'Dry Ration (Rice , Pulses , Sugar , Coffee, Tea)', 'Dustbin', 'Electric Fence', 'Electric Wires/Cable', 'Electric milk boiler', 'FRP', 'FRP Tank', 'Flood Light', 'Flooring', 'Forklifts', 'Fresh Fruits', 'Fresh Vegetable', 'Fuel Cell', 'Fuel cell genrators', 'GPS', 'GPS (Global Positioning System)', 'Ghillie Suits', 'Ghilly Suit', 'Gi Pipe','Gyser', 'HHTI (Hand Held Thermal Imagers)', 'Hand Held Gas Detector', 'Hand held Thermal Imager', 'Handheld GPS', 'Hardware Item', 'Headphones', 'High Intensity Light Infrared beam', 'Honey Sucker / Sewer Cum Jetting Machine', 'Hybrid UPS', 'Idli Steamer', 'Incinerators', 'Inflatable Shelters', 'Inverters', 'JCB Bacholoader', 'Jet Spray', 'Jungle Boots', 'Kunda Gadi', 'LGSF Building', 'Large compartmental stainless steel tiffin', 'Led Bulbs', 'Less Lethal Weapons', 'Lighting Arrestor', 'Lightning Arrestor', 'Long Range Acoustic Hailing Device', 'Lorros', 'MCB', 'MCCB', 'Meat Cutting Machine', 'Mild Steel LPG Barbecues', 'Milk', 'Milk Boiler', 'Miltary Rain Poncho', 'Miniature Circuit Breaker Switches', 'Monitor', 'Multi Function Laser Aiming System', 'Nano Uav', 'New lpg cooking appliances', 'Oil', 'Online UPS', 'Outdoor Gym', 'Oven', 'PNVG', 'PPGI Sheets','Patient Bed Fowler', 'Patient Care Mattress', 'Picket Steel', 'Pickup Truck', 'Plotter', 'Plywood', 'Porta Cabin', 'Portable Kitchen', 'Portable houses', 'Poultry Product (Chicken, Egg , Mutton)', 'Ppgi Sheet', 'Prefab shelters with puf panel of size 7.620 m x 13.271 m', 'Printer', 'Projector', 'Puff Cabin', 'Puff Shelter', 'Punched Tape concertina Coil PTCC', 'RO (Reverse Osmosis)', 'Remote Restraint Device', 'Rice Boiler', 'Rice boiler', 'Road Sweeping Machines', 'Robotics', 'Room Heater', 'Roti Making Machine', 'Roti Making Machine Auto matic', 'Rucksack Bags', 'SANITARY NAPKIN VENDING MACHINE', 'SS', 'SS Thermos', 'STP', 'STP (Sewage Treatment Plants)', 'Sand', 'Sanitary Items', 'Sanitary Napkins Incinetator Machine with Smoke ControlUnit', 'Satellite Tracker', 'Sea Food (Fish)', 'Search Light', 'Sedan / SUVS', 'Semi Automatic', 'Sewer Suction Machines', 'Shooting Range', 'Skid steer Loader', 'Software','Software Defined Radio', 'Solar Battery', 'Solar Lantern', 'Solar PV Panel', 'Solar PV Plant', 'Solar Power Plant', 'Solar Street Light', 'Solar Street Light all Type', 'Solar Tublar Batteries', 'Solar Water Heater', 'Solar inverter', 'Solar water Heater', 'Solar water pump', 'Speakers', 'Street Light', 'Switch fuse unit', 'Tablet', 'Tandoor', 'Tandoor, Height 481-500 Millimeter', 'Tubes', 'UAV', 'Under Water Torch', 'Unmanned Aerial Vehicle', 'Vaccum Cleaner', 'Vegetable Cutter', 'Video Survelliance & Analytics Solutions', 'WTP', 'Walkie Talkie', 'Waste Management', 'Waste Management Plants', 'Water Bowser', 'Water Cooling', 'Water Dispenser', 'Water Tanker', 'Weapon Sight', 'Weapon Sites', 'Weapon Support system', 'Wet Grinder', 'Wet grinder 5', 'Wheel Barrow', 'X-ray Machine', 'XLPE Cables', 'water cooler']]
+        item_list = [['Solar PV Panel','Solar Panel']]
 
         for elements in item_list: 
             threading_filename = os.path.join(os.path.dirname(__file__), 'db', "Gem_main", "gem_bid_id_ministry",f"{count}.json")

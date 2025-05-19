@@ -1,0 +1,42 @@
+import threading
+import time
+
+def gem_funtion(filename, file_pail, ministry_name, organization_name):
+    print(f"Started: {filename}")
+    time.sleep(3)  # Simulate work
+    print(f"Finished: {filename}")
+
+# Your list of arguments (simulate 8 tasks)
+task_args = [
+    ("file1", "pail1", "min1", "org1"),
+    ("file2", "pail2", "min2", "org2"),
+    ("file3", "pail3", "min3", "org3"),
+    ("file4", "pail4", "min4", "org4"),
+    ("file5", "pail5", "min5", "org5"),
+    ("file6", "pail6", "min6", "org6"),
+    ("file7", "pail7", "min7", "org7"),
+    ("file8", "pail8", "min8", "org8"),
+]
+
+max_threads = 4
+threads = []
+
+for args in task_args:
+    # Wait until active threads are less than max allowed
+    while True:
+        # Clean up finished threads
+        threads = [t for t in threads if t.is_alive()]
+        if len(threads) < max_threads:
+            break
+        time.sleep(0.5)  # Wait a bit before checking again
+
+    # Start new thread
+    t = threading.Thread(target=gem_funtion, args=args)
+    t.start()
+    threads.append(t)
+
+# Wait for all threads to finish
+for t in threads:
+    t.join()
+
+print("All tasks completed.")
