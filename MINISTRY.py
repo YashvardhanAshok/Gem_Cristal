@@ -136,6 +136,7 @@ def gem_find(driver,card_elements , card, gem_ids, element):
                         emd_amount = None
                         epbg_percentage = None
                         Tender_value = None
+                        MSE_value = None
                         Beneficiary = ['NA']
                         for page in pdf.pages:
 
@@ -145,6 +146,12 @@ def gem_find(driver,card_elements , card, gem_ids, element):
                                     for row in section:
                                         key = row[0]
                                         value = row[1]
+                                        try:
+                                            if key and 'MSE Purchase Preference' in key and value:
+                                                MSE_value = value
+                                                print()
+                                        except:
+                                            pass
                                         try:
                                             if key and 'Total Quantity' in key and value:
                                                 Total_Quantity = value
@@ -249,11 +256,12 @@ def gem_find(driver,card_elements , card, gem_ids, element):
                         event_data["START DATE"] = start_date
                         event_data["END DATE"] = end_date
                         event_data["END Time"] = end_date_time
-                        event_data["DAY LEFT"] = """=IF((INDIRECT("H"&ROW()) + INDIRECT("I"&ROW())) - NOW() <= 0, "CLOSED", INT((INDIRECT("H"&ROW()) + INDIRECT("I"&ROW())) - NOW()) & " days")"""
+                        event_data["DAY LEFT"] = ''
                         event_data["EMD AMOUNT"] = emd_amount
                         event_data["TENDER VALUE"] = Tender_value
                         try:
                             event_data["ITEM CATEGORY"] = Item_Category
+                            
                         except:
                             pass
                         
@@ -266,6 +274,15 @@ def gem_find(driver,card_elements , card, gem_ids, element):
                         
                         # event_data["DEPARTMENT"] = department_address_parts[1]
                         event_data["BRANCH"] = Beneficiary[0]
+                        
+                        event_data["MSE"] = MSE_value
+                        event_data["file_path"] = download_path
+                        event_data["link"] = link_href
+                        
+                        
+                        
+                        
+                        
                         return event_data
             
             else:
@@ -307,10 +324,10 @@ def sql(extracted_data):
                 date_of_search, tender_id, element_put, item_description, qty,
                 start_date, end_date, end_time, day_left_formula,
                 emd_amount, tender_value, item_category,
-                consignee_reporting, address,
-                ministry, department, branch,
+                consignee_reporting, address, MSE,
+                ministry, department, branch, link_href, file_path,
                 matches, matched_products
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
             values = (
@@ -328,11 +345,17 @@ def sql(extracted_data):
                 str(tender_data.get("ITEM CATEGORY", "")),
                 json.dumps(tender_data.get("Consignee Reporting", [])),
                 json.dumps(tender_data.get("ADDRESS", [])),
+                str(tender_data.get("MSE", '')),
                 str(tender_data.get("MINISTRY", "")),
                 str(tender_data.get("DEPARTMENT", "")),
                 str(tender_data.get("BRANCH", "")),
+                str(tender_data.get("file_path", '')),
+                str(tender_data.get("link", '')),
                 int(tender_data.get("matches", False)),
                 json.dumps(tender_data.get("matched_products", []))
+                
+                
+                
             )
 
             cursor.execute(insert_sql, values)
@@ -425,6 +448,7 @@ def gem_funtion(threading_filename, file_Pail, ministry_name, Organization_name,
                     if json_data:
                         extracted_data.append(json_data)
 
+                break
 
                 if page_no == max_page:
                     break
@@ -463,16 +487,16 @@ def gem():
         threads = []
 
         MINISTRY_list = [
-            ["MINISTRY OF COMMUNICATIONS", ['']],
-            ["MINISTRY OF HOUSING & URBAN AFFAIRS", ["HINDUSTAN STEELWORKS CONSTRUCTION LIMITED"]],
-            ["MINISTRY OF POWER", ["NTPC LIMITED"]],
-            ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
-            ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
-            ["MINISTRY OF HOME AFFAIRS", ["NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]],
-            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES","CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE"]],
-            ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
-            ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
-            ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
+            # ["MINISTRY OF COMMUNICATIONS", ['']],
+            # ["MINISTRY OF HOUSING & URBAN AFFAIRS", ["HINDUSTAN STEELWORKS CONSTRUCTION LIMITED"]],
+            # ["MINISTRY OF POWER", ["NTPC LIMITED"]],
+            # ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
+            # ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
+            # ["MINISTRY OF HOME AFFAIRS", ["NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]],
+            # ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES","CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE"]],
+            # ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
+            # ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
+            # ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
         
