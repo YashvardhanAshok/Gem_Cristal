@@ -448,7 +448,6 @@ def gem_funtion(threading_filename, file_Pail, ministry_name, Organization_name,
                     if json_data:
                         extracted_data.append(json_data)
 
-                break
 
                 if page_no == max_page:
                     break
@@ -487,16 +486,16 @@ def gem():
         threads = []
 
         MINISTRY_list = [
-            # ["MINISTRY OF COMMUNICATIONS", ['']],
-            # ["MINISTRY OF HOUSING & URBAN AFFAIRS", ["HINDUSTAN STEELWORKS CONSTRUCTION LIMITED"]],
-            # ["MINISTRY OF POWER", ["NTPC LIMITED"]],
-            # ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
-            # ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
-            # ["MINISTRY OF HOME AFFAIRS", ["NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]],
-            # ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES","CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE"]],
-            # ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
-            # ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
-            # ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
+            ["MINISTRY OF COMMUNICATIONS", ['']],
+            ["MINISTRY OF HOUSING & URBAN AFFAIRS", ["HINDUSTAN STEELWORKS CONSTRUCTION LIMITED"]],
+            ["MINISTRY OF POWER", ["NTPC LIMITED"]],
+            ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
+            ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
+            ["MINISTRY OF HOME AFFAIRS", ["NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]],
+            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES","CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
         
