@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import traceback
 from selenium.common.exceptions import NoSuchElementException
 import time
+import pandas as pd
 import json
 import os
 from datetime import date
@@ -344,7 +345,7 @@ def sql(extracted_data):
 
 
 
-def gem_funtion(threading_filename, file_Pail, ministry_name, Organization_name):
+def gem_funtion(threading_filename, file_Pail, ministry_name, Organization_name,tender_id):
     extracted_data = []
     
     driver = webdriver.Edge()
@@ -383,6 +384,8 @@ def gem_funtion(threading_filename, file_Pail, ministry_name, Organization_name)
         with open(threading_filename, "r") as f:
             gem_ids_json = json.load(f)
             gem_ids = gem_ids_json.get(string_name_file, [])
+            
+        gem_ids = tender_id
         #Organization
         Organization_dropdown = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-organization-container']"))
@@ -395,12 +398,12 @@ def gem_funtion(threading_filename, file_Pail, ministry_name, Organization_name)
         
         # surch_bu
         # Use JavaScript to click the button directly
-        sleep(2)
+        sleep(1)
         WebDriverWait(driver, 10).until(
             lambda d: d.execute_script("return typeof searchBid === 'function'")
         )
         driver.execute_script("searchBid('ministry-search')")
-        sleep(2)
+        sleep(1)
 
         try:
             pagination = driver.find_element(By.ID, "light-pagination")
@@ -452,10 +455,6 @@ def gem_funtion(threading_filename, file_Pail, ministry_name, Organization_name)
         json.dump(gem_ids_json, f, indent=2)
     print(gem_ids)
     driver.quit()
-
-
-
-
     
 def gem():
     try:
@@ -470,12 +469,13 @@ def gem():
             ["MINISTRY OF HEALTH AND FAMILY WELFARE", ["HLL INFRA TECH SERVICES LIMITED"]],
             ["MINISTRY OF CIVIL AVIATION", ["AIRPORTS AUTHORITY OF INDIA"]],
             ["MINISTRY OF HOME AFFAIRS", ["NATIONAL SECURITY GUARD", "INDO TIBETAN BORDER POLICE", "NATIONAL DISASTER RESPONSE FORCE"]],
-            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES", "CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE"]],
+            ["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES","CENTRAL RESERVE POLICE FORCE", "BORDER SECURITY FORCE","CENTRAL INDUSTRIAL SECURITY FORCE"]],
+            ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
             ["MINISTRY OF DEFENCE", ["INDIAN NAVY"]],
             ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
-            ["MINISTRY OF DEFENCE", ["INDIAN AIR FORCE"]]
+            ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
-
+        
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
             Organization_name=MINISTRY[1]
@@ -483,15 +483,25 @@ def gem():
             threading_filename = os.path.join(os.path.dirname(__file__), 'db', "Gem_ministry","json", f"{count}.json")
             file_Pail = os.path.join(os.path.dirname(__file__), 'db', "Gem_ministry","gem_bid_id_ministry", f"Su_{count}.json")
 
+            conn = pyodbc.connect(
+                "DRIVER={ODBC Driver 17 for SQL Server};"
+                "SERVER=localhost\\SQLEXPRESS;"
+                "DATABASE=gem_tenders;"
+                "Trusted_Connection=yes;"
+            )
+
+            query = "SELECT * FROM tender_data"
+            df = pd.read_sql(query, conn)
+
+            tender_id = df['tender_id'].tolist()
+
             while True:
-                # Clean up finished threads
                 threads = [t for t in threads if t.is_alive()]
                 if len(threads) < max_threads:
                     break
-                time.sleep(0.5)  # Wait a bit before checking again
+                time.sleep(0.5)
 
-            # Start new thread
-            t = threading.Thread(target=gem_funtion, args=(threading_filename,file_Pail,ministry_name,Organization_name))
+            t = threading.Thread(target=gem_funtion, args=(threading_filename,file_Pail,ministry_name,Organization_name,tender_id))
             t.start()
             threads.append(t)
                 
@@ -501,9 +511,5 @@ def gem():
 
 
 gem()
-
-# with open
-
-# failed_downloads = os.path.join(os.path.dirname(__file__), 'db', "Gem_ministry","gem_bid_id_ministry", f"Su_{count}.json")
 
 print(failed_downloads)

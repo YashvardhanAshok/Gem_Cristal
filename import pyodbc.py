@@ -13,9 +13,14 @@ conn = pyodbc.connect(
     "Trusted_Connection=yes;"
 )
 
-# Fetch data
 query = "SELECT * FROM tender_data"
 df = pd.read_sql(query, conn)
 
-total_entries = len(df)
+id_array = df['tender_id'].tolist()
+
+print("ID Array:", id_array)
+
+total_entries = len(id_array)
 print(f"Total entries: {total_entries}")
+
+# 3603

@@ -135,9 +135,9 @@ if department_col:
             col_letter = get_column_letter(col_idx)
             col_title = col_cell.value
             if col_title == 'Qty':
-                ws.column_dimensions[col_letter].width = 7
+                ws.column_dimensions[col_letter].width = 10
             elif col_title in ['Start Date', 'End Date', 'End Time', 'Day Left']:
-                ws.column_dimensions[col_letter].width = 13.5
+                ws.column_dimensions[col_letter].width = 15
             elif col_title == 'Item Description':
                 ws.column_dimensions[col_letter].width = 35
             elif col_title == 'Address':
