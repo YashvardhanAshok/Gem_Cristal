@@ -1,0 +1,1 @@
+'computer', 'pc', 'all in one', 'i3', 'i5', 'i7', 'i9', 'desktop', 'workstation', 'tower'

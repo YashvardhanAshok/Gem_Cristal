@@ -146,6 +146,17 @@ def Mainapp():
         tree.heading(col, text=col)
         tree.column(col, width=20, anchor="w")
 
+
+
+
+
+
+
+
+
+
+
+
     for row in sample_data:
         tree.insert("", "end", values=row)
 
@@ -153,3 +164,5 @@ def Mainapp():
     app.mainloop()
 
 Mainapp()
+
+
