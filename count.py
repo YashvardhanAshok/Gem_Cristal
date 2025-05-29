@@ -1,4 +1,5 @@
-['id', 'date_of_search', 'tender_id', 'element_put', 'item_description', 'qty', 'start_date', 'end_date', 'end_time', 'day_left_formula', 'emd_amount', 'tender_value', 'item_category', 'consignee_reporting', 'address', 'MSE', 'ministry', 'department', 'branch', 'link_href', 'file_path', 'matches', 'matched_products', 'status', 'L_Placeholder', 'Live']
+['id', 'date_of_search', 'tender_id', 'element_put', 'item_description', 'qty', 'start_date', 'end_date', 'end_time', 'day_left_formula', 'emd_amount', 'tender_value', 'item_category', 'consignee_reporting', 'address', 'MSE', 'ministry', 'department', 'branch', 'link_href', 'file_path', 'matches', 'matched_products', 'status', 'L_Placeholder', 'Live',"extended", "Cancel", "L1_update"]
+
 
 import pyodbc
 import pandas as pd
@@ -126,3 +127,6 @@ word('2025-05-28')
 
 # Wen - 347
 # 11780, 11882, 1579, 1769
+
+# thus
+# 13545

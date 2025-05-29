@@ -1,0 +1,7 @@
+def new_fu(a):
+    a.pop(0)
+a = [0,1,2,3,4,5]
+for x in range(0,5):
+    new_fu(a)   
+ 
+print(a)
