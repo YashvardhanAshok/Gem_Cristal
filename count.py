@@ -96,8 +96,8 @@ def word(date_of_today):
     doc.save(output_file)
     print(f"\n📄 Report saved to: {output_file}")
 
-termenal('2025-05-28')
-word('2025-05-28')
+termenal('2025-05-29')
+word('2025-05-29')
 
 # just completed Indian army and air force   
 

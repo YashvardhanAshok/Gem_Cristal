@@ -21,7 +21,7 @@ query = "SELECT * FROM tender_data"
 df = pd.read_sql(query, conn)
 
 # Columns to remove
-columns_to_drop = ['id', 'matches', 'matched_products', "element_put",  "consignee_reporting", "item_category","date_of_search","updated_at",'file_path', 'link_href',]
+columns_to_drop = ['id', 'matches', 'matched_products', "element_put",  "consignee_reporting", "item_category","date_of_search","updated_at",'file_path', 'link_href', 'Live',"extended", "Cancel", "L1_update",'L_Placeholder']
 for col in columns_to_drop:
     if col in df.columns:
         df = df.drop(columns=col)
