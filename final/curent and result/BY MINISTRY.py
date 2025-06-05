@@ -15,7 +15,6 @@ import pyodbc
 from datetime import datetime
 
 today = date.today()
-failed_downloads = []
 
 from time import sleep
 
@@ -27,6 +26,9 @@ import requests
 from urllib.parse import urlparse
 import re
 max_page= 9999
+import warnings
+warnings.filterwarnings("ignore", message="CropBox missing from /Page, defaulting to MediaBox")
+
 
 def clean_text(text):
     if text:
@@ -36,10 +38,8 @@ def clean_text(text):
 
     return ''
 
-xl_count = 2
+
 def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list):
-    global failed_downloads
-    global xl_count
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
     time.sleep(0.2)
     try:
@@ -70,7 +70,7 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
             else:
                 quantity = 0
 
-        except Exception as e:
+        except:
             quantity = 0
 
         try:
@@ -82,9 +82,8 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
             else:
                 department_address_parts = [department_address, None]
                 
-        except Exception as e:
+        except:
             department_address_parts=[None,None]
-            print(f"Could not extract department address: {e}")
 
         try:
             a_tag = card.find_element(By.CSS_SELECTOR, 'a[title][data-content]')
@@ -97,24 +96,20 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
                     title = titles.append(text)
 
         if bid_title.text in gem_ids:
+            gem_ids.remove(bid_title.text)
             print(f"gem id skipped:{bid_title.text} and started at: {start_date}")
             return
-        
         elif bid_title.text in close_tender_id_list:
             print(f"--xx gem id {bid_title.text} extended xx--")
             return {"extended": today.strftime("%d-%b-%Y"),"DATE OF SEARCH": today.strftime("%d-%b-%Y"),"TENDER ID": bid_title.text,"END DATE": end_date,"END Time": end_date_time}
-        
-        else:
-            gem_ids.append(bid_title.text)
 
-
+        print(f"New tender:{bid_title.text} and started at: {start_date}")
 
         try:
             try:
                 response = requests.get(link_href, stream=True, timeout=15)
                 response.raise_for_status()
             except requests.exceptions.RequestException as e:
-                failed_downloads.append([bid_title.text,element])
                 return
             
             if response.status_code == 200 and "text/html" not in response.headers.get("Content-Type", ""):
@@ -133,7 +128,7 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
                         if chunk:
                             f.write(chunk)
 
-                print(f"{bid_title.text} for: {download_path}")
+                # print(f"{bid_title.text} for: {download_path}")
 
                 if os.path.exists(download_path):
                     with pdfplumber.open(download_path) as pdf:
@@ -143,7 +138,6 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
                         MSE_value = None
                         Beneficiary = ['NA']
                         for page in pdf.pages:
-
                             tables = page.extract_tables()
                             for section in tables:
                                 try:
@@ -285,17 +279,62 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
                         return event_data
             
             else:
-                failed_downloads.append([bid_title.text,element])
                 print(f"Link is not a downloadable file or not found: {link_href}")
-        except Exception as download_error:
+        except:
+            # traceback.print_exc()
             try:
-                failed_downloads.append([bid_title.text,element])
-            except:
-                pass
-            traceback.print_exc()
-            print(f"Error downloading or reading file from {link_href}: {download_error}")
-    except Exception as e:
-        traceback.print_exc()
+                gem_ids.remove(bid_title.text)
+            except:pass
+            print(f"Error downloading link for gem id: {bid_title.text}")
+    except:
+        print(f"Error")
+        
+        
+def cancelled_fun(driver,gem_ids):
+    conn = pyodbc.connect(
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=localhost\\SQLEXPRESS;"
+        "DATABASE=gem_tenders;"
+        "Trusted_Connection=yes;"
+    )
+    driver.get('https://bidplus.gem.gov.in/all-bids')
+    cursor = conn.cursor()
+    update_query = """UPDATE tender_data SET Cancel = ? WHERE tender_id = ?"""
+
+    def update_sql(gem_id):
+        cursor.execute(update_query, "Cancel", gem_id)
+        conn.commit()
+        print(f"{gem_id}: Cancel")
+        sleep(5)
+    for gem_id in gem_ids:
+        try:
+            
+            search = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'searchBid')))
+            sleep(1)
+
+            search.clear()
+            search.send_keys(gem_id)
+            search.send_keys(Keys.RETURN)
+
+            try:
+                alerts = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.alert.alert-danger')))
+                for alert in alerts:
+                    print()
+                    try:
+                        if alert.text == "No data found":
+                            update_sql(gem_id)
+                    except: pass
+            except: traceback.print_exc() 
+
+        except:
+            traceback.print_exc() 
+            
+            print(f"Search failed for {gem_id}")
+
+    cursor.close()
+    conn.close()
+
+
 
 db_lock = threading.Lock()
 def sql(extracted_data):
@@ -311,13 +350,12 @@ def sql(extracted_data):
         for tender_data in extracted_data:
             tender_id = tender_data["TENDER ID"]
 
-            # Check if tender_id exists in DB
             cursor.execute("SELECT COUNT(*) FROM tender_data WHERE tender_id = ?", (tender_id,))
             exists = cursor.fetchone()[0]
 
             try:
                 end_date = datetime.strptime(tender_data["END DATE"], "%d-%b-%Y").date()
-            except Exception as e:
+            except:
                 print(f"Invalid END DATE for tender {tender_id}: {tender_data.get('END DATE')}")
                 end_date = None
 
@@ -325,18 +363,18 @@ def sql(extracted_data):
             date_of_search_str = tender_data.get("DATE OF SEARCH", "")
             try:
                 extended = datetime.strptime(date_of_search_str, "%d-%b-%Y").strftime("%Y-%m-%d")
-            except Exception as e:
+            except:
                 print(f"Invalid DATE OF SEARCH for tender {tender_id}: {date_of_search_str}")
                 extended = ""
 
             if exists:
                 update_sql = """
                     UPDATE tender_data
-                    SET end_date = ?, end_time = ?, extended = ?
+                    SET end_date = ?, end_time = ?, extended = ?,Cancel	 = ? 
                     WHERE tender_id = ?
                 """
-                cursor.execute(update_sql, (end_date, end_time, extended, tender_id))
-                print(f"Tender ID {tender_id} exists. Updated end_date, end_time, extended.")
+                cursor.execute(update_sql, (end_date, end_time, extended,"", tender_id))
+                print(f"Tender ID {tender_id} exists.")
                 conn.commit()
                 continue
 
@@ -383,36 +421,53 @@ def sql(extracted_data):
         cursor.close()
         conn.close()
 
-
-def gem_funtion(ministry_name, Organization_name,gem_ids,close_tender_id_list):
-    
+def gem_funtion(ministry_name, Organization_name):
     driver = webdriver.Edge()
-    driver.get('https://bidplus.gem.gov.in/advance-search')
-    sleep(0.1)
-
-    ministry_tab = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'ministry-tab')))
-    ministry_tab.click()
-    sleep(5)
-    
-    ministry_dropdown = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-ministry-container']"))
-    )
-    
-    ministry_dropdown.click()
-    sleep(2)
-    
-    ministry_search__field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'select2-search__field')))
-    ministry_search__field.clear()
-    
-    ministry_search__field.send_keys(ministry_name)
-    ministry_search__field.send_keys(Keys.RETURN)
-
-    json_dir = os.path.join(os.getcwd(), 'db', 'json')
-    os.makedirs(json_dir, exist_ok=True)
-
-    sleep(2)
-
     for org_name in Organization_name:
+        driver.get('https://bidplus.gem.gov.in/advance-search')
+        sleep(0.1)
+
+        conn = pyodbc.connect(
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "SERVER=localhost\\SQLEXPRESS;"
+            "DATABASE=gem_tenders;"
+            "Trusted_Connection=yes;"
+        )
+
+        query_on = "SELECT * FROM tender_data WHERE department = ? AND live = 'Yes' "
+        query_close = "SELECT * FROM tender_data WHERE department = ? AND live = 'No'"
+
+        df_on = pd.read_sql(query_on, conn, params=[org_name])
+        df_close = pd.read_sql(query_close, conn, params=[org_name])
+        conn.close()
+
+        gem_ids = df_on['tender_id'].tolist()
+        close_tender_id_list = df_close['tender_id'].tolist()
+        
+        ministry_tab = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'ministry-tab')))
+        ministry_tab.click()
+        sleep(5)
+        
+        ministry_dropdown = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-ministry-container']"))
+        )
+        
+        ministry_dropdown.click()
+        sleep(2)
+        
+        ministry_search__field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'select2-search__field')))
+        ministry_search__field.clear()
+        
+        ministry_search__field.send_keys(ministry_name)
+        ministry_search__field.send_keys(Keys.RETURN)
+
+        json_dir = os.path.join(os.getcwd(), 'db', 'json')
+        os.makedirs(json_dir, exist_ok=True)
+
+        sleep(2)
+
+
+
         extracted_data = []
         Organization_dropdown = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-organization-container']"))
@@ -431,9 +486,9 @@ def gem_funtion(ministry_name, Organization_name,gem_ids,close_tender_id_list):
         
         try:
             for page_no in range(int(max_page)):
+             
                 try:
-                    card_elements = WebDriverWait(driver, 30).until(
-                    EC.presence_of_all_elements_located((By.CLASS_NAME, 'card')))
+                    card_elements = WebDriverWait(driver, 30).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'card')))
                 except:
                     break
 
@@ -448,11 +503,10 @@ def gem_funtion(ministry_name, Organization_name,gem_ids,close_tender_id_list):
                 except:
                     break
                       
-        except Exception as e:
-            print("An error occurred:", str(e))
-            traceback.print_exc() 
+        except:
+            print(f"main loop brok for {ministry_name}: {org_name}") 
+        
         try:
-
             product = [['2 V Solar Battery cells', '3D Multi Spectral Camo Vehicle Cover', '3D Printer', '3d Multi Spectral Camo Dress', 'A.C Static Meter', 'ALL Types of commercial Gym Equipment', 'AMC OF COMMERCIAL KITCHEN EQUIPMENT', 'AMC OF Gym EQUIPMENT', 'Ac static watthour meters-energy meter', 'Access Control Solutions', 'Air Freight Shipping', 'Air curtain', 'All Range Hospital Furniture', 'All Types of Commercial RO PLANTS', 'All Types of Wire and Cables', 'Amc Of Ac', 'Amc Of Commercial Kitchen', 'Amc Of Fire Extinguishers', 'Amc Of Generators', 'Amc Of Gym Equipement', 'Amc Of Kitchen Equipement', 'Amc Of Lightning Arrestors', 'Amc Of Ro And IRP', 'Amc Of Solar Power Plant', 'Amc Of Solar Water Heaters', 'Amc Of Transformers', 'Amc of DG Sets and Transformer', 'AntI Drone system', 'Anti climb Fence', 'Automobile Batteries other batteries', 'Bain Marie', 'Bain marie', 'Barbed Wire', 'Battery', 'Body Worn Camera', 'Bola wrap Remote Restrain device', 'Braille Embosser', 'Bricks', 'Bucket Mop Wringer Trolly', 'Butter', 'CCTV', 'CEW (Conducted Electrical Weapon)', 'CGI Sheet', 'Cement','Chainlink Fence', 'Change over Switch', 'Chapati Warmer', 'Clip On Weapon Sites', 'Commercial Mixer', 'Commercial Vaccum Cleaner', 'Computer and peripherals', 'Construction Of Admin Blocks', 'Construction Of Hospital', 'Construction Of Internal Roads', 'Construction Of Klps For Defense', 'Convex Security Mirror', 'Cranes', 'Cyber Forensics Software', 'Cyber Security Solutions', 'DG SETS', 'Data Management solutions', 'Decorative Bollard', 'Decorative Street Light', 'Development Of Infrastructure For Defense', 'Development Of Sewerage Treatement Plant', 'Development Of Water Supply', 'Domestic casserole', 'Dough Kneader', 'Dough kneader 15kg', 'Dry Ration (Rice , Pulses , Sugar , Coffee, Tea)', 'Dustbin', 'Electric Fence', 'Electric Wires/Cable', 'Electric milk boiler', 'FRP', 'FRP Tank', 'Flood Light', 'Flooring', 'Forklifts', 'Fresh Fruits', 'Fresh Vegetable', 'Fuel Cell', 'Fuel cell genrators', 'GPS', 'GPS (Global Positioning System)', 'Ghillie Suits', 'Ghilly Suit', 'Gi Pipe','Gyser', 'HHTI (Hand Held Thermal Imagers)', 'Hand Held Gas Detector', 'Hand held Thermal Imager', 'Handheld GPS', 'Hardware Item', 'Headphones', 'High Intensity Light Infrared beam', 'Honey Sucker / Sewer Cum Jetting Machine', 'Hybrid UPS', 'Idli Steamer', 'Incinerators', 'Inflatable Shelters', 'Inverters', 'JCB Bacholoader', 'Jet Spray', 'Jungle Boots', 'Kunda Gadi', 'LGSF Building', 'Large compartmental stainless steel tiffin', 'Led Bulbs', 'Less Lethal Weapons', 'Lighting Arrestor', 'Lightning Arrestor', 'Long Range Acoustic Hailing Device', 'Lorros', 'MCB', 'MCCB', 'Meat Cutting Machine', 'Mild Steel LPG Barbecues', 'Milk', 'Milk Boiler', 'Miltary Rain Poncho', 'Miniature Circuit Breaker Switches', 'Monitor', 'Multi Function Laser Aiming System', 'Nano Uav', 'New lpg cooking appliances', 'Oil', 'Online UPS', 'Outdoor Gym', 'Oven', 'PNVG', 'PPGI Sheets','Patient Bed Fowler', 'Patient Care Mattress', 'Picket Steel', 'Pickup Truck', 'Plotter', 'Plywood', 'Porta Cabin', 'Portable Kitchen', 'Portable houses', 'Poultry Product (Chicken, Egg , Mutton)', 'Ppgi Sheet', 'Prefab shelters with puf panel of size 7.620 m x 13.271 m', 'Printer', 'Projector', 'Puff Cabin', 'Puff Shelter', 'Punched Tape concertina Coil PTCC', 'RO (Reverse Osmosis)', 'Remote Restraint Device', 'Rice Boiler', 'Rice boiler', 'Road Sweeping Machines', 'Robotics', 'Room Heater', 'Roti Making Machine', 'Roti Making Machine Auto matic', 'Rucksack Bags', 'SANITARY NAPKIN VENDING MACHINE', 'SS', 'SS Thermos', 'STP', 'STP (Sewage Treatment Plants)', 'Sand', 'Sanitary Items', 'Sanitary Napkins Incinetator Machine with Smoke ControlUnit', 'Satellite Tracker', 'Sea Food (Fish)', 'Search Light', 'Sedan / SUVS', 'Semi Automatic', 'Sewer Suction Machines', 'Shooting Range', 'Skid steer Loader', 'Software','Software Defined Radio', 'Solar Battery', 'Solar Lantern', 'Solar PV Panel','Solar Panel', 'Solar PV Plant', 'Solar Power Plant', 'Solar Street Light', 'Solar Street Light all Type', 'Solar Tublar Batteries', 'Solar Water Heater', 'Solar inverter', 'Solar water Heater', 'Solar water pump', 'Speakers', 'Street Light', 'Switch fuse unit', 'Tablet', 'Tandoor', 'Tandoor, Height 481-500 Millimeter', 'Tubes', 'UAV', 'Under Water Torch', 'Unmanned Aerial Vehicle', 'Vaccum Cleaner', 'Vegetable Cutter', 'Video Survelliance & Analytics Solutions', 'WTP', 'Walkie Talkie', 'Waste Management', 'Waste Management Plants', 'Water Bowser', 'Water Cooling', 'Water Dispenser', 'Water Tanker', 'Weapon Sight', 'Weapon Sites', 'Weapon Support system', 'Wet Grinder', 'Wet grinder 5', 'Wheel Barrow', 'X-ray Machine', 'XLPE Cables', 'water cooler']]
             flat_products = [item.lower() for sublist in product for item in sublist]
 
@@ -461,11 +515,15 @@ def gem_funtion(ministry_name, Organization_name,gem_ids,close_tender_id_list):
                 matches = [prod for prod in flat_products if prod in title]
                 item["matches"] = bool(matches)
                 item["matched_products"] = matches
+        
         except:
             print("error")
         sql(extracted_data)
+        
+        cancelled_fun(driver,gem_ids)
+
     driver.quit()
-    # GEM/2025/B/5885336
+
 def gem():
     try:
         max_threads = 4
@@ -485,30 +543,15 @@ def gem():
             ["MINISTRY OF DEFENCE", ["INDIAN AIR FORCE"]],
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
-        MINISTRY_list =  ["MINISTRY OF WATER RESOURCES RIVER DEVELOPMENT AND GANGA REJUVENATION", ["NATIONAL PROJECTS CONSTRUCTION CORPORATION LIMITED"]],
-        MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["SASHASTRA SEEMA BAL"]]]
 
-        # MINISTRY_list =[["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]]
+        # MINISTRY_list =  ["MINISTRY OF WATER RESOURCES RIVER DEVELOPMENT AND GANGA REJUVENATION", ["NATIONAL PROJECTS CONSTRUCTION CORPORATION LIMITED"]],
+        # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
+        
+        # MINISTRY_list = [["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]]
+
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
             Organization_name=MINISTRY[1]
-
-            conn = pyodbc.connect(
-                    "DRIVER={ODBC Driver 17 for SQL Server};"
-                    "SERVER=localhost\\SQLEXPRESS;"
-                    "DATABASE=gem_tenders;"
-                    "Trusted_Connection=yes;"
-                )
-
-            query_on = "SELECT * FROM tender_data WHERE ministry = ? AND live = 'Yes';"
-            query_close = "SELECT * FROM tender_data WHERE ministry = ? AND live = 'No';"
-
-            df_on = pd.read_sql(query_on, conn, params=[ministry_name])
-            df_close = pd.read_sql(query_close, conn, params=[ministry_name])
-            conn.close()
-
-            tender_id_list = df_on['tender_id'].tolist()
-            close_tender_id_list = df_close['tender_id'].tolist()
 
             while True:
                 threads = [t for t in threads if t.is_alive()]
@@ -516,15 +559,27 @@ def gem():
                     break
                 time.sleep(0.5)
 
-            t = threading.Thread(target=gem_funtion, args=(ministry_name,Organization_name,tender_id_list,close_tender_id_list))
+            t = threading.Thread(target=gem_funtion, args=(ministry_name,Organization_name))
             t.start()
             threads.append(t)
-                
     except:
         traceback.print_exc() 
-
-
+    
 
 gem()
 
-print(failed_downloads)
+
+# MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
+# Search failed for GEM/2025/B/6218325
+# Search failed for GEM/2025/B/6233148
+# Search failed for GEM/2025/B/6227970
+# Search failed for GEM/2025/B/6245270
+# Search failed for GEM/2025/B/6245389
+# Search failed for GEM/2025/B/6251316
+# Search failed for GEM/2025/B/6227153
+# Search failed for GEM/2025/B/6228127
+
+# demy aria 
+
+
+# GEM/2025/B/6310798

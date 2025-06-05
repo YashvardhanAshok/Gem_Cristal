@@ -15,6 +15,8 @@ from datetime import date
 today = date.today()
 from selenium.common.exceptions import NoSuchElementException
 import pyodbc
+import pyodbc
+import pandas as pd
 
 def sql_udate(status, L_Placeholder, tender_id_to_update):
     try:
@@ -73,8 +75,13 @@ def gem_funtion(elements_list):
                     if "Bid Award" in card.find_element(By.CLASS_NAME, 'text-success').text:
                         main_window = driver.current_window_handle
 
-                        view_bid_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@value='View BID Results']")))
-                        view_bid_button.click()
+                        try: 
+                            view_bid_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@value='View RA Results']")))
+                            view_bid_button.click()
+                            
+                        except: 
+                            view_bid_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@value='View BID Results']")))
+                            view_bid_button.click()
 
                         wait.until(EC.new_window_is_opened)
                         all_windows = driver.window_handles
@@ -164,8 +171,7 @@ def Main(item_list):
     except:
         traceback.print_exc() 
 
-import pyodbc
-import pandas as pd
+
 conn = pyodbc.connect(
     "DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=localhost\\SQLEXPRESS;"
@@ -173,12 +179,16 @@ conn = pyodbc.connect(
     "Trusted_Connection=yes;"
 )
 
-query = "SELECT * FROM tender_data"
+query = "SELECT * FROM tender_data "
 df = pd.read_sql(query, conn)
 
+# filtered_df = df[
+#     (df['Live'].str.lower() == 'no') & 
+#     (df['L_Placeholder'].isnull() | (df['L_Placeholder'] == 'null'))
+# ]
+# for know 
 filtered_df = df[
-    (df['Live'].str.lower() == 'no') & 
-    (df['L_Placeholder'].isnull() | (df['L_Placeholder'] == 'null'))
+    (df['Live'].str.lower() == 'no') 
 ]
 
 id_array = filtered_df['tender_id'].tolist()
@@ -191,5 +201,4 @@ def split_into_parts(lst, n):
     return [lst[i*k + min(i, m):(i+1)*k + min(i+1, m)] for i in range(n)]
 
 split_arrays = split_into_parts(id_array, 5)
-Main( split_arrays)
-
+Main(split_arrays)

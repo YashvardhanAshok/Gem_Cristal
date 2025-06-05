@@ -1,5 +1,6 @@
 import pyodbc
 import pandas as pd
+import ast
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.utils import get_column_letter
@@ -15,13 +16,14 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "SELECT * FROM tender_data where live = 'Yes' AND Cancel != 'Cancel'"
-query = "SELECT * FROM tender_data where live = 'Yes'"
+query = "SELECT * FROM tender_data"
+# query = "SELECT * FROM tender_data WHERE department = 'BORDER SECURITY FORCE';"
+# query = "SELECT * FROM tender_data WHERE date_of_search = '2025-05-31';"
 df = pd.read_sql(query, conn)
 
 # Columns to remove
-columns_to_drop = ['id', 'matches', 'matched_products', "element_put","Cancel", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
-columns_to_drop = ['id', 'matches', 'matched_products', "element_put", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
+columns_to_drop = ['id', 'matches', 'matched_products', "element_put",  "consignee_reporting", "item_category",
+                   "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "Cancel", "L1_update"]
 for col in columns_to_drop:
     if col in df.columns:
         df = df.drop(columns=col)
@@ -29,30 +31,28 @@ for col in columns_to_drop:
 # Replace 0s with empty strings
 df = df.replace(0, '')
 
-# Convert tender_value to readable format
-def convert_to_words(val):
+# Safely parse and expand L_Placeholder
+def expand_l_placeholder(row):
     try:
-        val = float(val)
-        if val >= 1_00_00_000:
-            return f"{val / 1_00_00_000:.1f} Cr"
-        elif val >= 1_00_000:
-            return f"{val / 1_00_000:.1f} LPA"
-        elif val > 0:
-            return f"{val:.0f}"
-        else:
-            return ""
-    except:
-        return ""
+        values = row.get("L_Placeholder") or row.get("L Placeholder")  # Handle both variations
+        if isinstance(values, str):
+            values = ast.literal_eval(values)
+        if not values:
+            return {}
 
-# Create new column for formatted tender value
-tender_value_col = None
-for col in df.columns:
-    if col.strip().lower() == "tender_value":
-        tender_value_col = col
-        break
+        result = {}
+        for i, pair in enumerate(values, start=1):
+            if isinstance(pair, list) and len(pair) == 2:
+                result[f"L{i}"] = pair[0]
+                result[f"L{i} Amount"] = pair[1]
+        return result
+    except Exception:
+        return {}
 
-if tender_value_col:
-    df['Ten-Val Word'] = df[tender_value_col].apply(convert_to_words)
+# Expand the L_Placeholder column
+if "L_Placeholder" in df.columns:
+    expanded_df = df.apply(expand_l_placeholder, axis=1, result_type='expand')
+    df = pd.concat([df.drop(columns=["L_Placeholder"]), expanded_df], axis=1)
 
 # Identify the department column
 department_col = None
@@ -61,16 +61,8 @@ for col in df.columns:
         department_col = col
         break
 
-# Rename columns for display
+# Rename columns
 df.columns = [col.replace('_', ' ').title() if col != 'day_left_formula' else 'Day Left' for col in df.columns]
-
-# Move 'Ten-Val Word' after 'Tender Valu'
-cols = df.columns.tolist()
-if 'Tender Valu' in cols and 'Ten-Val Word' in cols:
-    tender_index = cols.index('Tender Valu')
-    cols.remove('Ten-Val Word')
-    cols.insert(tender_index + 1, 'Ten-Val Word')
-    df = df[cols]
 
 # Output file
 output_file = "styled_tender_export.xlsx"
@@ -88,12 +80,13 @@ if department_col:
                 safe_sheet_name = "MINISTRY OF COMMUNICATIONS"
             sheet_names.append(safe_sheet_name)
 
+            # Insert blank row to make space for header
             group_df.index = group_df.index + 1
             group_df = group_df.sort_index()
 
             group_df.to_excel(writer, sheet_name=safe_sheet_name, index=False, startrow=1)
 
-    # Style workbook
+    # Open the workbook
     wb = load_workbook(output_file)
     thin_border = Border(
         left=Side(style='thin'),
@@ -105,12 +98,16 @@ if department_col:
     current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     for sheet_name in sheet_names:
+        if sheet_name not in wb.sheetnames:
+            print(f"⚠️ Skipping: Worksheet '{sheet_name}' does not exist.")
+            continue
         ws = wb[sheet_name]
 
-        # Print settings
+
+        # Set rows 1 and 2 to repeat on printed pages
         ws.print_title_rows = '1:2'
 
-        # Add top title
+        # Add sheet title and date at the top row
         sheet_title = f"{sheet_name} – Exported on {current_date}"
         max_col = ws.max_column
         ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_col)
@@ -119,11 +116,13 @@ if department_col:
         title_cell.font = Font(size=16, bold=True)
         title_cell.alignment = Alignment(horizontal="left", vertical="center")
 
-        # Autofilter
+        # Add autofilter to header row (row 2)
         ws.auto_filter.ref = f"A2:{get_column_letter(max_col)}2"
 
-        # Page layout
+        # Set page layout to landscape
         ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
+
+        # Set narrow margins
         ws.page_margins = PageMargins(
             left=0.25,
             right=0.25,
@@ -133,48 +132,47 @@ if department_col:
             footer=0.3
         )
 
-        # Header styling
+        # Style header row
         header_fill = PatternFill(start_color="bdbdbd", end_color="bdbdbd", fill_type="solid")
-        bold_font = Font(bold=True, size=18)
+        bold_font = Font(bold=True, size=15)
         for cell in ws[2]:
             cell.fill = header_fill
             cell.font = bold_font
             cell.border = thin_border
             cell.alignment = centered_wrap_alignment
 
-        # Data row styling
+        # Style data rows
         for row_idx, row in enumerate(ws.iter_rows(min_row=3, max_row=ws.max_row), start=3):
             ws.row_dimensions[row_idx].height = 120
             for idx, cell in enumerate(row):
-                cell.font = Font(size=18,bold=True)
+                cell.font = Font(size=15)
                 cell.border = thin_border
                 cell.alignment = centered_wrap_alignment
 
                 col_name = ws.cell(row=2, column=idx + 1).value
                 if col_name == 'Day Left':
-                    h_col = 'E'
-                    i_col = 'F'
+                    h_col = 'E'  # Start Date
+                    i_col = 'F'  # End Date
                     formula = f'=IF((INDIRECT("{h_col}"&ROW())+INDIRECT("{i_col}"&ROW()))-NOW() <= 0, "CLOSED", INT((INDIRECT("{h_col}"&ROW())+INDIRECT("{i_col}"&ROW()))-NOW()) & " days")'
                     cell.value = formula
                     cell.font = Font(size=18, color="FF0000")
 
-        # Column width adjustments
+        # Adjust column widths
         for col_idx, col_cell in enumerate(ws[2], start=1):
             col_letter = get_column_letter(col_idx)
             col_title = col_cell.value
             if col_title == 'Qty':
-                ws.column_dimensions[col_letter].width = 13
+                ws.column_dimensions[col_letter].width = 10
             elif col_title in ['Start Date', 'End Date', 'End Time', 'Day Left']:
-                ws.column_dimensions[col_letter].width = 18
+                ws.column_dimensions[col_letter].width = 15
             elif col_title == 'Item Description':
                 ws.column_dimensions[col_letter].width = 35
             elif col_title == 'Address':
-                ws.column_dimensions[col_letter].width = 36
+                ws.column_dimensions[col_letter].width = 40
             else:
                 ws.column_dimensions[col_letter].width = 18
 
     wb.save(output_file)
-    print(f"✅ Data exported successfully to {output_file} with 'Ten-Val Word' next to 'Tender Valu'.")
+    print(f"✅ Data exported successfully to {output_file} with header row and all formatting applied.")
 else:
     print("❌ Error: 'Department' column not found in the data.")
-
