@@ -27,21 +27,11 @@ from urllib.parse import urlparse
 import re
 max_page= 9999
 import warnings
-warnings.filterwarnings("ignore", message="CropBox missing from /Page, defaulting to MediaBox")
 
-
-def clean_text(text):
-    if text:
-        text = re.sub(r'\(cid:\d+\)', '', text)
-        text = text.replace('\n', ' ').replace('\r', ' ').strip()
-        return text
-
-    return ''
-
-
-def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list):
+def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,gem_ids_copy):
+    # scroll
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
-    time.sleep(0.2)
+    time.sleep(0.01)
     try:
         bid_title1 = card.find_element(By.CLASS_NAME, 'bid_no_hover')
         bid_title = bid_title1
@@ -95,8 +85,9 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
                 if text.startswith(bid_title.text):
                     title = titles.append(text)
 
-        if bid_title.text in gem_ids:
-            gem_ids.remove(bid_title.text)
+        if bid_title.text in gem_ids_copy:
+            try: gem_ids.remove(bid_title.text)
+            except: pass
             print(f"gem id skipped:{bid_title.text} and started at: {start_date}")
             return
         elif bid_title.text in close_tender_id_list:
@@ -288,53 +279,58 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list)
             print(f"Error downloading link for gem id: {bid_title.text}")
     except:
         print(f"Error")
+        traceback.print_exc()
+        
         
         
 def cancelled_fun(driver,gem_ids):
-    conn = pyodbc.connect(
-        "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=localhost\\SQLEXPRESS;"
-        "DATABASE=gem_tenders;"
-        "Trusted_Connection=yes;"
-    )
+    Cancel_ids = [] 
     driver.get('https://bidplus.gem.gov.in/all-bids')
-    cursor = conn.cursor()
-    update_query = """UPDATE tender_data SET Cancel = ? WHERE tender_id = ?"""
 
-    def update_sql(gem_id):
-        cursor.execute(update_query, "Cancel", gem_id)
-        conn.commit()
-        print(f"{gem_id}: Cancel")
-        sleep(5)
+
+    def update_sql(gem_ids):
+        conn = pyodbc.connect(
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "SERVER=localhost\\SQLEXPRESS;"
+            "DATABASE=gem_tenders;"
+            "Trusted_Connection=yes;"
+        )
+        
+        cursor = conn.cursor()
+        update_query = """UPDATE tender_data SET Cancel = ? WHERE tender_id = ?"""
+        
+        for gem_id in gem_ids:
+            cursor.execute(update_query, "Cancel", gem_id)
+            conn.commit()
+            print(f"{gem_id}: Cancel")
+            
+        cursor.close()
+        conn.close()
+    
     for gem_id in gem_ids:
         try:
-            
             search = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'searchBid')))
-            sleep(1)
-
+            driver.execute_script("arguments[0].scrollIntoView(true);", search)
+            time.sleep(0.5)
             search.clear()
             search.send_keys(gem_id)
             search.send_keys(Keys.RETURN)
 
             try:
-                alerts = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.alert.alert-danger')))
+                alerts = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.alert.alert-danger')))
                 for alert in alerts:
                     print()
                     try:
                         if alert.text == "No data found":
-                            update_sql(gem_id)
+                            Cancel_ids.append(gem_id) 
                     except: pass
             except: traceback.print_exc() 
 
         except:
             traceback.print_exc() 
-            
             print(f"Search failed for {gem_id}")
 
-    cursor.close()
-    conn.close()
-
-
+    update_sql(Cancel_ids)
 
 db_lock = threading.Lock()
 def sql(extracted_data):
@@ -385,8 +381,8 @@ def sql(extracted_data):
                 emd_amount, tender_value, item_category,
                 consignee_reporting, address, MSE,
                 ministry, department, branch, link_href, file_path,
-                matches, matched_products
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                matches, matched_products,Cancel 
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
             values = (
@@ -404,14 +400,15 @@ def sql(extracted_data):
                 str(tender_data.get("ITEM CATEGORY", "")),
                 json.dumps(tender_data.get("Consignee Reporting", [])),
                 json.dumps(tender_data.get("ADDRESS", [])),
-                str(tender_data.get("MSE", '')),
+                str(tender_data.get("MSE", "")),
                 str(tender_data.get("MINISTRY", "")),
                 str(tender_data.get("DEPARTMENT", "")),
                 str(tender_data.get("BRANCH", "")),
-                str(tender_data.get("link", '')),
-                str(tender_data.get("file_path", '')),
+                str(tender_data.get("link", "")),
+                str(tender_data.get("file_path", "")),
                 int(tender_data.get("matches", False)),
-                json.dumps(tender_data.get("matched_products", []))
+                json.dumps(tender_data.get("matched_products", [])),
+                ""
             )
 
             cursor.execute(insert_sql, values)
@@ -434,7 +431,8 @@ def gem_funtion(ministry_name, Organization_name):
             "Trusted_Connection=yes;"
         )
 
-        query_on = "SELECT * FROM tender_data WHERE department = ? AND live = 'Yes' "
+        query_on = "SELECT * FROM tender_data WHERE department = ? AND live = 'Yes' AND (Cancel IS NULL OR Cancel = '')"
+
         query_close = "SELECT * FROM tender_data WHERE department = ? AND live = 'No'"
 
         df_on = pd.read_sql(query_on, conn, params=[org_name])
@@ -442,6 +440,8 @@ def gem_funtion(ministry_name, Organization_name):
         conn.close()
 
         gem_ids = df_on['tender_id'].tolist()
+        gem_ids_copy = gem_ids.copy()
+        
         close_tender_id_list = df_close['tender_id'].tolist()
         
         ministry_tab = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'ministry-tab')))
@@ -493,7 +493,7 @@ def gem_funtion(ministry_name, Organization_name):
                     break
 
                 for card in card_elements:
-                    json_data = gem_find(driver, card_elements, card, gem_ids, org_name,close_tender_id_list)
+                    json_data = gem_find(driver, card_elements, card, gem_ids, org_name,close_tender_id_list,gem_ids_copy)
                     if json_data:
                         extracted_data.append(json_data)
 
@@ -519,14 +519,14 @@ def gem_funtion(ministry_name, Organization_name):
         except:
             print("error")
         sql(extracted_data)
-        
+        print(gem_ids)
         cancelled_fun(driver,gem_ids)
 
     driver.quit()
 
 def gem():
     try:
-        max_threads = 4
+        max_threads = 3
         threads = []
 
         MINISTRY_list = [
@@ -569,17 +569,4 @@ def gem():
 gem()
 
 
-# MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
-# Search failed for GEM/2025/B/6218325
-# Search failed for GEM/2025/B/6233148
-# Search failed for GEM/2025/B/6227970
-# Search failed for GEM/2025/B/6245270
-# Search failed for GEM/2025/B/6245389
-# Search failed for GEM/2025/B/6251316
-# Search failed for GEM/2025/B/6227153
-# Search failed for GEM/2025/B/6228127
-
-# demy aria 
-
-
-# GEM/2025/B/6310798
+['GEM/2025/B/6218360', 'GEM/2025/B/6245270', 'GEM/2025/B/6245389', 'GEM/2025/B/6276118', 'GEM/2025/B/6275868', 'GEM/2025/B/6302129', 'GEM/2025/B/6302822', 'GEM/2025/B/6312497']
