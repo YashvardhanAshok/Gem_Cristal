@@ -17,6 +17,7 @@ from datetime import datetime
 today = date.today()
 
 from time import sleep
+import time
 
 import requests
 import ntpath
@@ -25,17 +26,37 @@ import pdfplumber
 import requests
 from urllib.parse import urlparse
 import re
-max_page= 9999
-import warnings
+ 
+import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
+from time import sleep,time
+import os
+import json
+from selenium.webdriver.support import expected_conditions as EC
+import configparser
+config = configparser.ConfigParser()
+import re
+import threading
+import traceback
+import requests
+from datetime import datetime
+import pyodbc
+
+
+ 
+ 
+
+ 
+ 
+ 
 
 def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,gem_ids_copy):
     # scroll
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
-    time.sleep(0.01)
+    sleep(0.01)
     try:
-        bid_title1 = card.find_element(By.CLASS_NAME, 'bid_no_hover')
-        bid_title = bid_title1
-        link_href = bid_title1.get_attribute("href")
+        bid_title = card.find_element(By.CLASS_NAME, 'bid_no_hover')
+        link_href = bid_title.get_attribute("href")
 
         start_date = card.find_element(By.CLASS_NAME, 'start_date').text
         end_date = card.find_element(By.CLASS_NAME, 'end_date').text
@@ -89,7 +110,7 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
             try: gem_ids.remove(bid_title.text)
             except: pass
             print(f"gem id skipped:{bid_title.text} and started at: {start_date}")
-            return
+            return {"extended": today.strftime("%d-%b-%Y"),"DATE OF SEARCH": today.strftime("%d-%b-%Y"),"TENDER ID": bid_title.text,"END DATE": end_date,"END Time": end_date_time}
         elif bid_title.text in close_tender_id_list:
             print(f"--xx gem id {bid_title.text} extended xx--")
             return {"extended": today.strftime("%d-%b-%Y"),"DATE OF SEARCH": today.strftime("%d-%b-%Y"),"TENDER ID": bid_title.text,"END DATE": end_date,"END Time": end_date_time}
@@ -311,23 +332,23 @@ def cancelled_fun(driver,gem_ids):
         try:
             search = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'searchBid')))
             driver.execute_script("arguments[0].scrollIntoView(true);", search)
-            time.sleep(0.5)
+            sleep(0.5)
             search.clear()
             search.send_keys(gem_id)
             search.send_keys(Keys.RETURN)
 
             try:
-                alerts = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.alert.alert-danger')))
+                alerts = WebDriverWait(driver, 3).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.alert.alert-danger')))
                 for alert in alerts:
                     print()
                     try:
                         if alert.text == "No data found":
                             Cancel_ids.append(gem_id) 
                     except: pass
-            except: traceback.print_exc() 
+            except: pass 
 
         except:
-            traceback.print_exc() 
+            # traceback.print_exc() 
             print(f"Search failed for {gem_id}")
 
     update_sql(Cancel_ids)
@@ -418,9 +439,17 @@ def sql(extracted_data):
         cursor.close()
         conn.close()
 
+options = uc.ChromeOptions()
+options.add_argument("--profile-directory=Default") 
+options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
+options.add_argument("--disable-blink-features=AutomationControlled")
+
+gemlog_="gem_log.txt"
+
 def gem_funtion(ministry_name, Organization_name):
-    driver = webdriver.Edge()
+    driver = uc.Chrome(options=options, headless=False)
     for org_name in Organization_name:
+
         driver.get('https://bidplus.gem.gov.in/advance-search')
         sleep(0.1)
 
@@ -432,7 +461,6 @@ def gem_funtion(ministry_name, Organization_name):
         )
 
         query_on = "SELECT * FROM tender_data WHERE department = ? AND live = 'Yes' AND (Cancel IS NULL OR Cancel = '')"
-
         query_close = "SELECT * FROM tender_data WHERE department = ? AND live = 'No'"
 
         df_on = pd.read_sql(query_on, conn, params=[org_name])
@@ -448,9 +476,7 @@ def gem_funtion(ministry_name, Organization_name):
         ministry_tab.click()
         sleep(5)
         
-        ministry_dropdown = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-ministry-container']"))
-        )
+        ministry_dropdown = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[@id='select2-ministry-container']")))
         
         ministry_dropdown.click()
         sleep(2)
@@ -478,36 +504,46 @@ def gem_funtion(ministry_name, Organization_name):
         Organization_search__field.send_keys(org_name)
         Organization_search__field.send_keys(Keys.RETURN)
 
-        WebDriverWait(driver, 10).until(
-            lambda d: d.execute_script("return typeof searchBid === 'function'")
-        )
+        WebDriverWait(driver, 10).until(lambda d: d.execute_script("return typeof searchBid === 'function'"))
  
         driver.execute_script("searchBid('ministry-search')")
         
+        card_count = 0 
+
+        live_tenders = org_name + ":\n"
         try:
-            for page_no in range(int(max_page)):
+            for page_no in range(9999):
              
                 try:
                     card_elements = WebDriverWait(driver, 30).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'card')))
-                except:
-                    break
+                except: break
 
                 for card in card_elements:
-                    json_data = gem_find(driver, card_elements, card, gem_ids, org_name,close_tender_id_list,gem_ids_copy)
-                    if json_data:
-                        extracted_data.append(json_data)
+                    bid_title = card.find_element(By.CLASS_NAME, 'bid_no_hover')
+                    live_tenders += str(card_count) + f". {bid_title.text}\n"
+                    card_count += 1
 
+                    try:
+                        json_data = gem_find(driver, card_elements, card, gem_ids, org_name,close_tender_id_list,gem_ids_copy)
+                        if json_data: extracted_data.append(json_data)
+                    except: pass
+                
                 try:
                     next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='light-pagination']//a[contains(@class, 'next')]")))
                     next_button.click()
-                except:
-                    break
+                except: break
                       
         except:
             print(f"main loop brok for {ministry_name}: {org_name}") 
         
+        
+
+        
+        with open('input_file.ext', 'a', encoding='utf-8') as outfile:
+            outfile.write(live_tenders + '\n')
+        
         try:
-            product = [['2 V Solar Battery cells', '3D Multi Spectral Camo Vehicle Cover', '3D Printer', '3d Multi Spectral Camo Dress', 'A.C Static Meter', 'ALL Types of commercial Gym Equipment', 'AMC OF COMMERCIAL KITCHEN EQUIPMENT', 'AMC OF Gym EQUIPMENT', 'Ac static watthour meters-energy meter', 'Access Control Solutions', 'Air Freight Shipping', 'Air curtain', 'All Range Hospital Furniture', 'All Types of Commercial RO PLANTS', 'All Types of Wire and Cables', 'Amc Of Ac', 'Amc Of Commercial Kitchen', 'Amc Of Fire Extinguishers', 'Amc Of Generators', 'Amc Of Gym Equipement', 'Amc Of Kitchen Equipement', 'Amc Of Lightning Arrestors', 'Amc Of Ro And IRP', 'Amc Of Solar Power Plant', 'Amc Of Solar Water Heaters', 'Amc Of Transformers', 'Amc of DG Sets and Transformer', 'AntI Drone system', 'Anti climb Fence', 'Automobile Batteries other batteries', 'Bain Marie', 'Bain marie', 'Barbed Wire', 'Battery', 'Body Worn Camera', 'Bola wrap Remote Restrain device', 'Braille Embosser', 'Bricks', 'Bucket Mop Wringer Trolly', 'Butter', 'CCTV', 'CEW (Conducted Electrical Weapon)', 'CGI Sheet', 'Cement','Chainlink Fence', 'Change over Switch', 'Chapati Warmer', 'Clip On Weapon Sites', 'Commercial Mixer', 'Commercial Vaccum Cleaner', 'Computer and peripherals', 'Construction Of Admin Blocks', 'Construction Of Hospital', 'Construction Of Internal Roads', 'Construction Of Klps For Defense', 'Convex Security Mirror', 'Cranes', 'Cyber Forensics Software', 'Cyber Security Solutions', 'DG SETS', 'Data Management solutions', 'Decorative Bollard', 'Decorative Street Light', 'Development Of Infrastructure For Defense', 'Development Of Sewerage Treatement Plant', 'Development Of Water Supply', 'Domestic casserole', 'Dough Kneader', 'Dough kneader 15kg', 'Dry Ration (Rice , Pulses , Sugar , Coffee, Tea)', 'Dustbin', 'Electric Fence', 'Electric Wires/Cable', 'Electric milk boiler', 'FRP', 'FRP Tank', 'Flood Light', 'Flooring', 'Forklifts', 'Fresh Fruits', 'Fresh Vegetable', 'Fuel Cell', 'Fuel cell genrators', 'GPS', 'GPS (Global Positioning System)', 'Ghillie Suits', 'Ghilly Suit', 'Gi Pipe','Gyser', 'HHTI (Hand Held Thermal Imagers)', 'Hand Held Gas Detector', 'Hand held Thermal Imager', 'Handheld GPS', 'Hardware Item', 'Headphones', 'High Intensity Light Infrared beam', 'Honey Sucker / Sewer Cum Jetting Machine', 'Hybrid UPS', 'Idli Steamer', 'Incinerators', 'Inflatable Shelters', 'Inverters', 'JCB Bacholoader', 'Jet Spray', 'Jungle Boots', 'Kunda Gadi', 'LGSF Building', 'Large compartmental stainless steel tiffin', 'Led Bulbs', 'Less Lethal Weapons', 'Lighting Arrestor', 'Lightning Arrestor', 'Long Range Acoustic Hailing Device', 'Lorros', 'MCB', 'MCCB', 'Meat Cutting Machine', 'Mild Steel LPG Barbecues', 'Milk', 'Milk Boiler', 'Miltary Rain Poncho', 'Miniature Circuit Breaker Switches', 'Monitor', 'Multi Function Laser Aiming System', 'Nano Uav', 'New lpg cooking appliances', 'Oil', 'Online UPS', 'Outdoor Gym', 'Oven', 'PNVG', 'PPGI Sheets','Patient Bed Fowler', 'Patient Care Mattress', 'Picket Steel', 'Pickup Truck', 'Plotter', 'Plywood', 'Porta Cabin', 'Portable Kitchen', 'Portable houses', 'Poultry Product (Chicken, Egg , Mutton)', 'Ppgi Sheet', 'Prefab shelters with puf panel of size 7.620 m x 13.271 m', 'Printer', 'Projector', 'Puff Cabin', 'Puff Shelter', 'Punched Tape concertina Coil PTCC', 'RO (Reverse Osmosis)', 'Remote Restraint Device', 'Rice Boiler', 'Rice boiler', 'Road Sweeping Machines', 'Robotics', 'Room Heater', 'Roti Making Machine', 'Roti Making Machine Auto matic', 'Rucksack Bags', 'SANITARY NAPKIN VENDING MACHINE', 'SS', 'SS Thermos', 'STP', 'STP (Sewage Treatment Plants)', 'Sand', 'Sanitary Items', 'Sanitary Napkins Incinetator Machine with Smoke ControlUnit', 'Satellite Tracker', 'Sea Food (Fish)', 'Search Light', 'Sedan / SUVS', 'Semi Automatic', 'Sewer Suction Machines', 'Shooting Range', 'Skid steer Loader', 'Software','Software Defined Radio', 'Solar Battery', 'Solar Lantern', 'Solar PV Panel','Solar Panel', 'Solar PV Plant', 'Solar Power Plant', 'Solar Street Light', 'Solar Street Light all Type', 'Solar Tublar Batteries', 'Solar Water Heater', 'Solar inverter', 'Solar water Heater', 'Solar water pump', 'Speakers', 'Street Light', 'Switch fuse unit', 'Tablet', 'Tandoor', 'Tandoor, Height 481-500 Millimeter', 'Tubes', 'UAV', 'Under Water Torch', 'Unmanned Aerial Vehicle', 'Vaccum Cleaner', 'Vegetable Cutter', 'Video Survelliance & Analytics Solutions', 'WTP', 'Walkie Talkie', 'Waste Management', 'Waste Management Plants', 'Water Bowser', 'Water Cooling', 'Water Dispenser', 'Water Tanker', 'Weapon Sight', 'Weapon Sites', 'Weapon Support system', 'Wet Grinder', 'Wet grinder 5', 'Wheel Barrow', 'X-ray Machine', 'XLPE Cables', 'water cooler']]
+            product = [['2 V Solar Battery cells', '3D Multi Spectral Camo Vehicle Cover', '3D Printer', '3d Multi Spectral Camo Dress', 'A.C Static Meter', 'ALL Types of commercial Gym Equipment', 'AMC OF COMMERCIAL KITCHEN EQUIPMENT', 'AMC OF Gym EQUIPMENT', 'Ac static watthour meters-energy meter', 'Access Control Solutions', 'Air Freight Shipping', 'Air curtain', 'All Range Hospital Furniture', 'All Types of Commercial RO PLANTS', 'All Types of Wire and Cables',"Amc", 'Amc Of Ac', 'Amc Of Commercial Kitchen', 'Amc Of Fire Extinguishers', 'Amc Of Generators', 'Amc Of Gym Equipement', 'Amc Of Kitchen Equipement', 'Amc Of Lightning Arrestors', 'Amc Of Ro And IRP', 'Amc Of Solar Power Plant', 'Amc Of Solar Water Heaters', 'Amc Of Transformers', 'Amc of DG Sets and Transformer', 'AntI Drone system', 'Anti climb Fence', 'Automobile Batteries other batteries', 'Bain Marie', 'Bain marie', 'Barbed Wire', 'Battery', 'Body Worn Camera', 'Bola wrap Remote Restrain device', 'Braille Embosser', 'Bricks', 'Bucket Mop Wringer Trolly', 'Butter', 'CCTV', 'CEW',' Conducted Electrical Weapon', 'CGI Sheet', 'Cement','Chainlink Fence', 'Change over Switch', 'Chapati Warmer', 'Clip On Weapon Sites', 'Commercial Mixer', 'Commercial Vaccum Cleaner', 'Computer and peripherals', 'Construction Of Admin Blocks', 'Construction Of Hospital', 'Construction Of Internal Roads', 'Construction Of Klps For Defense', 'Convex Security Mirror', 'Cranes', 'Cyber Forensics Software', 'Cyber Security Solutions', 'DG SETS', 'Data Management solutions', 'Decorative Bollard', 'Decorative Street Light', 'Development Of Infrastructure For Defense', 'Development Of Sewerage Treatement Plant', 'Development Of Water Supply', 'Domestic casserole', 'Dough Kneader', 'Dough kneader 15kg', 'Dry Ration', 'Rice' , 'Pulses' , 'Sugar' , 'Coffee', 'Tea', 'Dustbin', 'Electric Fence', 'Electric Wires/Cable', 'Electric milk boiler', 'FRP', 'FRP Tank', 'Flood Light', 'Flooring', 'Forklifts', 'Fresh Fruits', 'Fresh Vegetable', 'Fuel Cell', 'Fuel cell genrators', 'GPS', 'GPS', 'Global Positioning System', 'Ghillie Suits', 'Ghilly Suit', 'Gi Pipe','Gyser', 'HHTI (Hand Held Thermal Imagers)', 'Hand Held Gas Detector', 'Hand held Thermal Imager', 'Handheld GPS', 'Hardware Item', 'Headphones', 'High Intensity Light Infrared beam', 'Honey Sucker / Sewer Cum Jetting Machine', 'Hybrid UPS', 'Idli Steamer', 'Incinerators', 'Inflatable Shelters', 'Inverters', 'JCB Bacholoader', 'Jet Spray', 'Jungle Boots', 'Kunda Gadi', 'LGSF Building', 'Large compartmental stainless steel tiffin', 'Led Bulbs', 'Less Lethal Weapons', 'Lighting Arrestor', 'Lightning Arrestor', 'Long Range Acoustic Hailing Device', 'Lorros', 'MCB', 'MCCB', 'Meat Cutting Machine', 'Mild Steel LPG Barbecues', 'Milk', 'Milk Boiler', 'Miltary Rain Poncho', 'Miniature Circuit Breaker Switches', 'Monitor', 'Multi Function Laser Aiming System', 'Nano Uav', 'New lpg cooking appliances', 'Oil', 'Online UPS', 'Outdoor Gym', 'Oven', 'PNVG', 'PPGI Sheets','Patient Bed Fowler', 'Patient Care Mattress', 'Picket Steel', 'Pickup Truck', 'Plotter', 'Plywood', 'Porta Cabin', 'Portable Kitchen', 'Portable houses', 'Poultry Product', 'Chicken', 'Egg' , 'Mutton', 'Ppgi Sheet', 'Prefab shelters with puf panel', 'Printer', 'Projector', 'Puff Cabin', 'Puff Shelter', 'Punched Tape concertina Coil PTCC', 'Reverse Osmosis', 'Remote Restraint Device', 'Rice Boiler', 'Rice boiler', 'Road Sweeping Machines', 'Robotics', 'Room Heater', 'Roti Making Machine', 'Roti Making Machine Auto matic', 'Rucksack Bags', 'SANITARY NAPKIN VENDING MACHINE', 'SS', 'SS Thermos', 'STP', 'Sewage Treatment Plants', 'Sand', 'Sanitary Items', 'Sanitary Napkins Incinetator Machine with Smoke ControlUnit', 'Satellite Tracker', 'Sea Food (Fish)', 'Search Light', 'Sedan ',' SUVS', 'Semi Automatic', 'Sewer Suction Machines', 'Shooting Range', 'Skid steer Loader', 'Software','Software Defined Radio', 'Solar Battery', 'Solar Lantern', 'Solar PV Panel','Solar Panel', 'Solar PV Plant', 'Solar Power Plant', 'Solar Street Light', 'Solar Street Light all Type', 'Solar Tublar Batteries', 'Solar Water Heater', 'Solar inverter', 'Solar water Heater', 'Solar water pump', 'Speakers', 'Street Light', 'Switch fuse unit', 'Tablet', 'Tandoor', 'Tandoor, Height 481-500 Millimeter', 'Tubes', 'UAV', 'Under Water Torch', 'Unmanned Aerial Vehicle', 'Vaccum Cleaner', 'Vegetable Cutter', 'Video Survelliance ',' Analytics Solutions', 'WTP', 'Walkie Talkie', 'Waste Management', 'Waste Management Plants', 'Water Bowser', 'Water Cooling', 'Water Dispenser', 'Water Tanker', 'Weapon Sight', 'Weapon Sites', 'Weapon Support system', 'Wet Grinder', 'Wheel Barrow', 'X-ray Machine', 'XLPE Cables', 'water cooler']]
             flat_products = [item.lower() for sublist in product for item in sublist]
 
             for item in extracted_data:
@@ -519,14 +555,13 @@ def gem_funtion(ministry_name, Organization_name):
         except:
             print("error")
         sql(extracted_data)
-        print(gem_ids)
         cancelled_fun(driver,gem_ids)
 
     driver.quit()
 
 def gem():
     try:
-        max_threads = 3
+        max_threads = 4
         threads = []
 
         MINISTRY_list = [
@@ -544,10 +579,7 @@ def gem():
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
 
-        # MINISTRY_list =  ["MINISTRY OF WATER RESOURCES RIVER DEVELOPMENT AND GANGA REJUVENATION", ["NATIONAL PROJECTS CONSTRUCTION CORPORATION LIMITED"]],
-        # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
-        
-        # MINISTRY_list = [["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]]
+        MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
 
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
@@ -557,16 +589,12 @@ def gem():
                 threads = [t for t in threads if t.is_alive()]
                 if len(threads) < max_threads:
                     break
-                time.sleep(0.5)
+                sleep(0.5)
 
             t = threading.Thread(target=gem_funtion, args=(ministry_name,Organization_name))
             t.start()
             threads.append(t)
     except:
         traceback.print_exc() 
-    
 
 gem()
-
-
-['GEM/2025/B/6218360', 'GEM/2025/B/6245270', 'GEM/2025/B/6245389', 'GEM/2025/B/6276118', 'GEM/2025/B/6275868', 'GEM/2025/B/6302129', 'GEM/2025/B/6302822', 'GEM/2025/B/6312497']

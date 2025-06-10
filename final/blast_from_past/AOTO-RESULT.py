@@ -51,65 +51,123 @@ db_lock = threading.Lock()
 def sql(tenders):
     with db_lock:
         conn = pyodbc.connect(
-        "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=localhost\\SQLEXPRESS;"
-        "DATABASE=gem_tenders;"
-        "Trusted_Connection=yes;"
-    )
-    cursor = conn.cursor()
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "SERVER=localhost\\SQLEXPRESS;"
+            "DATABASE=gem_tenders;"
+            "Trusted_Connection=yes;"
+        )
+        cursor = conn.cursor()
 
-    # Loop through each tender and update it
-    for tender in tenders:
         try:
-            if tender:
-                
-                tender={'DATE OF SEARCH': '30-May-2025', 'TENDER ID': 'GEM/2024/B/4930239', 'ITEM DESCRIPTION': 'TAB DROTAVERINE HYDROCHLORIDE PLUS MEFENAMIC ACID,TAB KETOROLAC DT 10MG,TAB ETORICOXIB PLUS THIOCOL', 'QTY': '8627', 'START DATE': '09-May-2024', 'END DATE': '30-May-2024', 'END Time': '7:00 PM', 'DAY LEFT': '', 'EMD AMOUNT': None, 'TENDER VALUE': None, 'ITEM CATEGORY': 'TAB DROTAVERINE HYDROCHLORIDE PLUS MEFENAMIC\nACID , TAB KETOROLAC DT 10MG , TAB ETORICOXIB PLUS\nTHIOCOLCHICOSIDE , CAP DOXYCYCLINE 100MG PLUS\nLACTOBACILLUS 5BILLION SPORES , TAB PANTOPRAZOLE\n40MG , TAB B COMPLEX WITH VITAMIN C , TAB\nALBENDAZOLE , TAB CINNARIZINE 20MG PLUS\nDIMENHYDRINATE 40MG , TAB TERBINAFINE , TAB\nBISACODYL IP 5MG , TAB LOPERAMIDE , TAB FLAVOXATE ,\nINJ HAEMACCEL , INJ CEFTRIAXONE 1GM , INJ RANITIDINE\n25MG , INJ ETHAMSYLATE , INJ ATROPINE , INJ\nAMINIOPHYLLIN , ANTACID GEL , E D BECLOMETASONE 0\nPOINT 025 PERCENTAGE W V PLUS NEOMYCIN 0 POINT 5\nPERCENTAGE W V PLUS CLOTRIMAZOLE 1 PERCENTAGE W V\n, SPRAY ANALGESIC , OINT TERBINAFINE , ROLLER\nBANDAGE 7 POINT 5CM , BOTROCLOT SOLUTION , CAP\nDEPIN 10MG , ADHESIVE PLASTER 7 POINT 5CM , EDTA\nPOWDER , URO BAG , NEBULIZER MASK , NASAL CANNULA ,\nRYLES TUBE , SUCTION CATHETER , HUMAN MIXTARD\nINSULIN 30 70 40IU , FINGER SPLINT , TAB\nSERRATOPEPTIDASE 10 , TAB TRANEXAMIC ACID 500 , CAP\nITRACONAZOLE , TAB FEXOFENADINE 120 , TAB WYSOLONE\nPREDNISOLONE 5MG , TAB DEXONA DEXAMETHASONE 0\nPOINT 5 , OINT BETAMETHASONE 0 POINT 1 PERCENTAGE W\nW PLUS GENTAMICIN 0 POINT 1 PERCENTAGE W W PLUS\nMICONAZOLE 2 PERCENTAGE W W', 'Consignee Reporting': ['Sachin Kumar'], 'ADDRESS': ['491001,162 BN BSF, NEAR BSF\nTRANSIT CAMP GOKUL NAGAR\n(BMC BOYS HOSTEL), PO-\nPULGAON, DISTT- DURG,\nSTATE-CHHATTISGARH, PIN\nCODE-491001'], 'MINISTRY': 'Ministry of Home Affairs', 'BRANCH': 'NA', 'MSE': 'Yes', 'file_path': 'C:\\vs_code\\TenderHunter2.1.3\\download_pdf\\GeM-Bidding-6387843.pdf', 'link': 'https://bidplus.gem.gov.in/showbidDocument/6387843'}
-                
-                end_time = str(tender.get("END Time", ""))
-                
-                end_date = datetime.strptime(tender['END DATE'], "%d-%b-%Y").date()
-                update_sql = """
-                    UPDATE tender_data
-                    SET
-                        date_of_search = ?, element_put = ?, item_description = ?, qty = ?,
-                        start_date = ?, end_date = ?, day_left_formula = ?,
-                        emd_amount = ?, tender_value = ?, item_category = ?,
-                        consignee_reporting = ?, address = ?, MSE = ?,
-                        ministry = ?, department = ?, branch = ?, link_href = ?, file_path = ?,
-                        matches = ?, matched_products = ?, end_time = ?
-                    WHERE tender_id = ?
-                """
+            for tender_data in tenders:
+                if not tender_data:
+                    continue  
+                tender_id = tender_data["TENDER ID"]
 
-                values = (
-                    datetime.strptime(tender["DATE OF SEARCH"], "%d-%b-%Y").date(),
-                    str(tender.get("elementPut", "")),
-                    str(tender.get("ITEM DESCRIPTION", "")),
-                    int(tender.get("QTY", 0)),
-                    datetime.strptime(tender["START DATE"], "%d-%b-%Y").date(),
-                    end_date,
-                    str(tender.get("DAY LEFT", "")),
-                    float(tender.get("EMD AMOUNT") or 0),
-                    float(tender.get("TENDER VALUE") or 0),
-                    str(tender.get("ITEM CATEGORY", "")),
-                    json.dumps(tender.get("Consignee Reporting", [])),
-                    json.dumps(tender.get("ADDRESS", [])),
-                    str(tender.get("MSE", '')),
-                    str(tender.get("MINISTRY", "")),
-                    str(tender.get("DEPARTMENT", "")),
-                    str(tender.get("BRANCH", "")),
-                    str(tender.get("link", '')),
-                    str(tender.get("file_path", '')),
-                    int(tender.get("matches", False)),
-                    json.dumps(tender.get("matched_products", [])),
-                    end_time,
-                    str(tender["TENDER ID"]),
-                )
+                # Check if tender exists
+                cursor.execute("SELECT COUNT(*) FROM tender_data WHERE tender_id = ?", (tender_id,))
+                exists = cursor.fetchone()[0]
 
-                print("updated",tender["TENDER ID"])
-                cursor.execute(update_sql, values)
-                conn.commit()
-        except:
-            print("erro in sql")
+                # Parse end_date safely
+                try:
+                    end_date = datetime.strptime(tender_data["END DATE"], "%d-%b-%Y").date()
+                except:
+                    print(f"Invalid END DATE for tender {tender_id}: {tender_data.get('END DATE')}")
+                    end_date = None
+
+                end_time = str(tender_data.get("END Time", ""))
+
+                if exists:
+                    update_sql = """
+                        UPDATE tender_data
+                        SET
+                            date_of_search = ?, element_put = ?, item_description = ?, qty = ?,
+                            start_date = ?, end_date = ?, day_left_formula = ?,
+                            emd_amount = ?, tender_value = ?, item_category = ?,
+                            consignee_reporting = ?, address = ?, MSE = ?,
+                            ministry = ?, department = ?, branch = ?, link_href = ?, file_path = ?,
+                            matches = ?, matched_products = ?, end_time = ?
+                        WHERE tender_id = ?
+                    """
+
+                    values = (
+                        datetime.strptime(tender_data["DATE OF SEARCH"], "%d-%b-%Y").date(),
+                        str(tender_data.get("elementPut", "")),
+                        str(tender_data.get("ITEM DESCRIPTION", "")),
+                        int(tender_data.get("QTY", 0)),
+                        datetime.strptime(tender_data["START DATE"], "%d-%b-%Y").date(),
+                        end_date,
+                        str(tender_data.get("DAY LEFT", "")),
+                        float(tender_data.get("EMD AMOUNT") or 0),
+                        float(tender_data.get("TENDER VALUE") or 0),
+                        str(tender_data.get("ITEM CATEGORY", "")),
+                        json.dumps(tender_data.get("Consignee Reporting", [])),
+                        json.dumps(tender_data.get("ADDRESS", [])),
+                        str(tender_data.get("MSE", '')),
+                        str(tender_data.get("MINISTRY", "")),
+                        str(tender_data.get("DEPARTMENT", "")),
+                        str(tender_data.get("BRANCH", "")),
+                        str(tender_data.get("link", '')),
+                        str(tender_data.get("file_path", '')),
+                        int(tender_data.get("matches", False)),
+                        json.dumps(tender_data.get("matched_products", [])),
+                        end_time,
+                        tender_id
+                    )
+
+                    cursor.execute(update_sql, values)
+                    conn.commit()
+                    print(f"Tender ID {tender_id} updated successfully.")
+
+                else:
+                    insert_sql = """
+                        INSERT INTO tender_data (
+                            date_of_search, tender_id, element_put, item_description, qty,
+                            start_date, end_date, end_time, day_left_formula,
+                            emd_amount, tender_value, item_category,
+                            consignee_reporting, address, MSE,
+                            ministry, department, branch, link_href, file_path,
+                            matches, matched_products, Cancel
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """
+
+                    values = (
+                        datetime.strptime(tender_data["DATE OF SEARCH"], "%d-%b-%Y").date(),
+                        tender_id,
+                        str(tender_data.get("elementPut", "")),
+                        str(tender_data.get("ITEM DESCRIPTION", "")),
+                        int(tender_data.get("QTY", 0)),
+                        datetime.strptime(tender_data["START DATE"], "%d-%b-%Y").date(),
+                        end_date,
+                        end_time,
+                        str(tender_data.get("DAY LEFT", "")),
+                        float(tender_data.get("EMD AMOUNT") or 0),
+                        float(tender_data.get("TENDER VALUE") or 0),
+                        str(tender_data.get("ITEM CATEGORY", "")),
+                        json.dumps(tender_data.get("Consignee Reporting", [])),
+                        json.dumps(tender_data.get("ADDRESS", [])),
+                        str(tender_data.get("MSE", "")),
+                        str(tender_data.get("MINISTRY", "")),
+                        str(tender_data.get("DEPARTMENT", "")),
+                        str(tender_data.get("BRANCH", "")),
+                        str(tender_data.get("link", "")),
+                        str(tender_data.get("file_path", "")),
+                        int(tender_data.get("matches", False)),
+                        json.dumps(tender_data.get("matched_products", [])),
+                        ""  # default Cancel field
+                    )
+
+                    cursor.execute(insert_sql, values)
+                    conn.commit()
+                    print(f"Tender ID {tender_id} inserted successfully.")
+
+        except Exception:
+            traceback.print_exc()
+            print("Error in SQL function")
+
+        finally:
+            cursor.close()
+            conn.close()
             
 def gem_find(driver, card_elements, card):
     global failed_downloads
@@ -330,15 +388,14 @@ def gem_find(driver, card_elements, card):
                         event_data["Capacity_Value"]=Capacity_Value
 
 
-                        # event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
-                        event_data["TENDER ID"] = bid_title.text
+                        event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
                         try:
                             pass
-                            # event_data["ITEM DESCRIPTION"] = title
+                            event_data["ITEM DESCRIPTION"] = title
                         except:
                             try:
                                 pass
-                                # event_data["ITEM DESCRIPTION"] = Item_Category
+                                event_data["ITEM DESCRIPTION"] = Item_Category
                             except:
                                 pass
                         try:
@@ -350,28 +407,32 @@ def gem_find(driver, card_elements, card):
                         except:
                             pass
                         
-                        # event_data["START DATE"] = start_date
-                        # event_data["END DATE"] = end_date
-                        # event_data["END Time"] = end_date_time
-                        # event_data["DAY LEFT"] = ''
-                        # event_data["EMD AMOUNT"] = emd_amount
-                        # event_data["TENDER VALUE"] = Tender_value
+                        event_data["START DATE"] = start_date
+                        event_data["END DATE"] = end_date
+                        event_data["END Time"] = end_date_time
+                        event_data["DAY LEFT"] = ''
+                        event_data["EMD AMOUNT"] = emd_amount
+                        event_data["TENDER VALUE"] = Tender_value
                         try:
-                            # event_data["ITEM CATEGORY"] = Item_Category
+                            event_data["ITEM CATEGORY"] = Item_Category
                             pass
                         except:
                             pass
                         
-                        # event_data["Consignee Reporting"] = Consignee_Reporting_list 
-                        # event_data["ADDRESS"] = Address_list
+                        event_data["Consignee Reporting"] = Consignee_Reporting_list 
+                        event_data["ADDRESS"] = Address_list
 
-                        # event_data["MINISTRY"] = department_address_parts[0]
                         
-                        # event_data["BRANCH"] = Beneficiary[0]
+                        event_data["BRANCH"] = Beneficiary[0]
                         
-                        # event_data["MSE"] = MSE_value
-                        # event_data["file_path"] = download_path
-                        # event_data["link"] = link_href
+                        event_data["MSE"] = MSE_value
+                        event_data["file_path"] = download_path
+                        event_data["link"] = link_href
+                        global MINISTRY_word
+                        global department_word
+                        event_data["MINISTRY"] = MINISTRY_word
+                        event_data["DEPARTMENT"] = department_word
+                        event_data["TENDER ID"] = bid_title.text
                         
                         with open('input_file.ext', 'a', encoding='utf-8') as outfile:
                             outfile.write(json.dumps(event_data, ensure_ascii=False) + '\n\n')
@@ -455,7 +516,7 @@ conn = pyodbc.connect(
     "Trusted_Connection=yes;"
 )
 
-query  = "SELECT * FROM tender_data WHERE date_of_search = '2025-05-31';"
+query  = "select * from tender_data where start_date is null ;"
 df = pd.read_sql(query, conn)
 
 id_array = df['tender_id'].tolist()
@@ -469,23 +530,94 @@ def split_into_parts(lst, n):
     return [lst[i*k + min(i, m):(i+1)*k + min(i+1, m)] for i in range(n)]
 
 
-raw_text = """   GEM/2024/B/4781381
-GEM/2024/B/4802267
-GEM/2024/B/5335423
-GEM/2024/B/5512048
-GEM/2024/B/5157152
-GEM/2024/B/5240700
-GEM/2024/B/5333788
-GEM/2024/B/5358015
+MINISTRY_word = 'MINISTRY OF HOME AFFAIRS'
+department_word = 'ASSAM RIFLES'
+raw_text = """  
+GEM/2024/B/5189371
+GEM/2024/B/5105951
+GEM/2024/B/4983020
+GEM/2024/B/4983328
+GEM/2024/B/5106085
+GEM/2024/B/5106357
+GEM/2024/B/5192704
+GEM/2024/B/5142198
+GEM/2024/B/5180071
+GEM/2024/B/5180760
+GEM/2024/B/5180369
+GEM/2024/B/5180125
+GEM/2024/B/5180507
+GEM/2024/B/5149724
+GEM/2024/B/5157900
+GEM/2024/B/5175918
+GEM/2024/B/5096566
+GEM/2024/B/5168441
+GEM/2024/B/5162934
+GEM/2024/B/5157370
+GEM/2024/B/5086571
+GEM/2024/B/5140702
+GEM/2024/B/5142292
+GEM/2024/B/5121500
+GEM/2024/B/5035541
+GEM/2024/B/5122458
+GEM/2024/B/5103891
+GEM/2024/B/4973241
+GEM/2024/B/5009949
+GEM/2024/B/5008251
+GEM/2024/B/5092723
+GEM/2024/B/5071821
+GEM/2024/B/5051369
+GEM/2024/B/5041631
+GEM/2024/B/5055850
+GEM/2024/B/5040693
+GEM/2024/B/5040418
+GEM/2024/B/5041141
+GEM/2024/B/5041490
+GEM/2024/B/5032507
+GEM/2024/B/5031053
+GEM/2024/B/5019642
+GEM/2024/B/4956410
+GEM/2024/B/5024155
+GEM/2024/B/5013332
+GEM/2024/B/5005825
+GEM/2024/B/4892414
+GEM/2024/B/4971588
+GEM/2024/B/4848167
+GEM/2024/B/4919077
+GEM/2024/B/4784636
+GEM/2024/B/4909187
+GEM/2024/B/4906195
+GEM/2024/B/4908957
+GEM/2024/B/4893752
+GEM/2024/B/4893707
+GEM/2024/B/4888113
+GEM/2024/B/4703844
+GEM/2024/B/4854881
+GEM/2024/B/4853448
+GEM/2024/B/4844394
+GEM/2024/B/4849092
+GEM/2024/B/4850931
+GEM/2024/B/4829104
+GEM/2024/B/4711970
+GEM/2024/B/4784661
+GEM/2024/B/4785576
+GEM/2024/B/4785862
+GEM/2024/B/4767192
+GEM/2024/B/4748184
+GEM/2024/B/4693414
+GEM/2024/B/4693414
+GEM/2023/B/4377566
+GEM/2023/B/4377697
+GEM/2023/B/4377150
+GEM/2023/B/4372885
+
 """
+# tender_ids = raw_text.strip().split('\n')
 
-tender_ids = raw_text.strip().split('\n')
-
-tender_ids = set(tender_ids)
+tender_ids = set(id_array)
 tender_ids = list(tender_ids)
 
+split_arrays = split_into_parts(id_array, 4)
+Main(split_arrays)
+# Main([['GEM/2025/B/6129949']])
 
-# split_arrays = split_into_parts(id_array, 5)
-
-split_arrays = split_into_parts(tender_ids, 1)
-Main(split_arrays )
+# split_arrays = split_into_parts(tender_ids, 1)

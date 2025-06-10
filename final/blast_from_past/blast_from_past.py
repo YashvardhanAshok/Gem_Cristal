@@ -85,14 +85,14 @@ def sql(extracted_data):
                 datetime.strptime(tender_data["DATE OF SEARCH"], "%d-%b-%Y").date(),
                 str(tender_data["TENDER ID"]),
                 str(tender_data.get("elementPut", "")),
-                str(tender_data.get("ITEM DESCRIPTION", "")),
+                str(tender_data.get("description", "")),
                 int(tender_data.get("QTY", 0)),
-                end_date,
+                str(tender_data.get('END DATE', "")),
                 end_time,
                 str(tender_data.get("DAY LEFT", "")),
                 float(tender_data.get("EMD AMOUNT") or 0),
                 float(tender_data.get("TENDER VALUE") or 0),
-                str(tender_data.get("ITEM CATEGORY", "")),
+                str(tender_data.get("description", "")),
                 json.dumps(tender_data.get("Consignee Reporting", [])),
                 json.dumps(tender_data.get("ADDRESS", [])),
                 str(tender_data.get("MSE", '')),
@@ -128,6 +128,7 @@ def bidassist(driver,tenders,MINISTRY,department):
             "emd_amount":"",
             "ITEM CATEGORY":"",
         }
+        
 
         try:
             a_tag = card.find_element(By.CSS_SELECTOR, "a.anchor-wrap")
@@ -162,7 +163,10 @@ def bidassist(driver,tenders,MINISTRY,department):
 
         try:
             closed_date = card.find_element(By.CSS_SELECTOR, "span.truncate.textHeading")
-            data["END DATE"] = closed_date.text.strip()
+            from datetime import datetime
+
+            date_str = closed_date.text.strip()
+            data["END DATE"] = datetime.strptime(date_str, "%d %b %Y").strftime("%Y-%m-%d")
         except:
             pass
 
@@ -185,68 +189,44 @@ def bidassist(driver,tenders,MINISTRY,department):
 
 db_lock = threading.Lock()
 
-def bidassist_funtion(past_tender_name,iteams):
+def bidassist_funtion(past_tender_name):
     driver = webdriver.Edge()
     MINISTRY = past_tender_name[0]
     department = past_tender_name[1] 
     tenders = []
-    department2 = department.replace(" ", "%20")
+    link= f"https://bidassist.com/tender-results/all-tenders/active?utm_source=Google&utm_medium=cpc&utm_campaign=15355181231&utm_term=bidassist&utm_content=Search&gad_source=1&gad_campaignid=15355181231&gbraid=0AAAAADFIc7985V2eOxP4JI_LGnrqH3UTD&gclid=CjwKCAjwo4rCBhAbEiwAxhJlCUSBCFUpAaNSw_RsVaNlJuXaNYW0EOonqHJJFDTfO5yQT3kDuwVWexoCPxwQAvD_BwE&filter=PURCHASER_NAME:Assam%20Rifles&filter=PROCUREMENT_SOURCE:GEM&filter=CONTRACT_DATE:1704047400000%7C&sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2024&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
+    driver.get(link)
+    sleep(0.1)
     
-    for iteam in iteams:  
-        # iteam = iteam.replace(" ", "%20")
-        tender_id = iteam.replace("/", "%2f")
-        # GEM%2F2024%2FB%2F5179431
-        link= f"https://bidassist.com/all-tenders/archived?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ARCHIVED&tenderEntity=TENDER_LISTING&year=2024&filter=KEYWORD:{tender_id}&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
-        # link= f"https://bidassist.com/all-tenders/archived?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ARCHIVED&tenderEntity=TENDER_LISTING&year=2025&filter=PURCHASER_NAME:{department2}&filter=KEYWORD:{iteam}&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
-        driver.get(link)
-        sleep(0.1)
-        
 
-        while True:
-            try:
-                bidassist(driver,tenders,MINISTRY,department)
+    while True:
+        try:
+            bidassist(driver,tenders,MINISTRY,department)
 
-                next_button = driver.find_element(By.CSS_SELECTOR, "ul[role='navigation'] li.next a[rel='next'][aria-disabled='false']")
-                next_href = next_button.get_attribute("href")
+            next_button = driver.find_element(By.CSS_SELECTOR, "ul[role='navigation'] li.next a[rel='next'][aria-disabled='false']")
+            next_href = next_button.get_attribute("href")
 
-                if next_href:
-                    driver.get(next_href)
-                else:
-                    break  
-            except:
+            if next_href:
+                driver.get(next_href)
+            else:
                 break
+            
+        
+        except:
+            break
+        # break
+
+    print(tenders)
     sql(tenders)
     driver.quit()
     
 
-tender_ids = [
-    'GEM/2024/B/5113433', 'GEM/2024/R/378645', 'GEM/2024/B/4568536', 'GEM/2024/R/329749',
-    'GEM/2024/B/5003503', 'GEM/2024/R/427460', 'GEM/2024/B/5512048', 'GEM/2024/B/5558220',
-    'GEM/2024/B/5612315', 'GEM/2024/B/5483168', 'GEM/2024/B/5659812', 'GEM/2024/B/5526863',
-    'GEM/2024/B/5511326', 'GEM/2024/R/422113', 'GEM/2024/B/5631624', 'GEM/2024/B/5643064',
-    'GEM/2024/B/5643002', 'GEM/2024/B/5649841', 'GEM/2024/B/5618063', 'GEM/2024/B/5643089',
-    'GEM/2024/B/5566511', 'GEM/2024/R/418591', 'GEM/2024/B/5510221', 'GEM/2024/R/416293',
-    'GEM/2024/B/5581211', 'GEM/2024/B/5505387', 'GEM/2024/R/412755', 'GEM/2024/B/5536711',
-    'GEM/2024/B/5580968', 'GEM/2024/B/5415863', 'GEM/2024/B/5185116', 'GEM/2024/R/408635',
-    'GEM/2024/B/5540465', 'GEM/2024/B/5526860', 'GEM/2024/B/5086729', 'GEM/2024/R/404493',
-    'GEM/2024/B/5358015', 'GEM/2024/R/404082', 'GEM/2024/B/5562499', 'GEM/2024/B/5386437',
-    'GEM/2024/B/5534853', 'GEM/2024/B/5477215', 'GEM/2024/B/5477554', 'GEM/2024/B/5477680',
-    'GEM/2024/B/5430828', 'GEM/2024/B/5333788', 'GEM/2024/R/393592', 'GEM/2024/B/5400689',
-    'GEM/2024/B/5401591', 'GEM/2024/B/5400209', 'GEM/2024/B/5413073', 'GEM/2024/B/5396459',
-    'GEM/2024/B/4781381', 'GEM/2024/R/389911', 'GEM/2024/B/5299482', 'GEM/2024/R/386506',
-    'GEM/2024/B/5240830', 'GEM/2024/R/386406', 'GEM/2024/B/5247453', 'GEM/2024/R/386409',
-    'GEM/2024/B/5253268', 'GEM/2024/R/386413', 'GEM/2024/B/5240700', 'GEM/2024/R/383401',
-    'GEM/2024/B/5318254', 'GEM/2024/B/5335423', 'GEM/2024/B/5234770', 'GEM/2024/R/380614',
-    'GEM/2024/B/5319954', 'GEM/2024/B/5151263', 'GEM/2024/B/5202790', 'GEM/2024/R/377167',
-    'GEM/2024/B/5179431', 'GEM/2024/R/375707', 'GEM/2024/B/5126691'
-]
 
 
-
-past_tender_name=["MINISTRY OF HOME AFFAIRS","Assam Rifles"]
+past_tender_name=["MINISTRY OF HOME AFFAIRS","ASSAM RIFLES"]
     
 # bidassist_funtion(past_tender_name,iteams)
-bidassist_funtion(past_tender_name,tender_ids)
+bidassist_funtion(past_tender_name)
 
 
 

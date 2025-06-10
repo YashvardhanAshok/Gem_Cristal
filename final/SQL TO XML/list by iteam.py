@@ -5163,4 +5163,8 @@ for item, count in counts.items():
     ws.append([item, count])
 
 # Save the Excel file
-wb.save("item_counts.xlsx")
+import os
+save_file = os.path.abspath(os.path.join(os.path.dirname(__file__),"xl files")) 
+output_file = f"{save_file}/item_counts.xlsx"
+
+wb.save("output_file")

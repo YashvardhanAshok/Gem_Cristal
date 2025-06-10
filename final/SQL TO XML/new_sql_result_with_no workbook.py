@@ -12,7 +12,7 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "SELECT * FROM tender_data"
+query = "select * from tender_data where department ='ASSAM RIFLES';"
 df = pd.read_sql(query, conn)
 
 # Drop unnecessary columns
@@ -59,7 +59,9 @@ if 'Start Date' in df.columns and 'End Date' in df.columns:
 # Identify department column
 department_col = next((col for col in df.columns if col.strip().lower() == "department"), None)
 
-output_file = "fast_export_result.xlsx"
+import os
+save_file = os.path.abspath(os.path.join(os.path.dirname(__file__),"xl files")) 
+output_file = f"{save_file}/No-workbook.xlsx"
 
 if department_col:
     with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:

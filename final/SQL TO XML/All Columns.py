@@ -21,9 +21,13 @@ for col in df.columns:
     if col.strip().lower() == "department":
         department_col = col
         break
+    
+import os
+save_file = os.path.abspath(os.path.join(os.path.dirname(__file__),"xl files")) 
+output_file = f"{save_file}/All Columns.xlsx"
+
 
 df.columns = [col.replace('_', ' ').title() if col != 'day_left_formula' else 'Day Left' for col in df.columns]
-output_file = "unfilterd_tender.xlsx"
 
 if department_col:
     department_col = department_col.replace('_', ' ').title()

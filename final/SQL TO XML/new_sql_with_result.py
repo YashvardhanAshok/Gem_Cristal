@@ -65,7 +65,10 @@ for col in df.columns:
 df.columns = [col.replace('_', ' ').title() if col != 'day_left_formula' else 'Day Left' for col in df.columns]
 
 # Output file
-output_file = "styled_tender_export.xlsx"
+import os
+save_file = os.path.abspath(os.path.join(os.path.dirname(__file__),"xl files")) 
+output_file = f"{save_file}/New main.xlsx"
+
 
 if department_col:
     department_col = department_col.replace('_', ' ').title()

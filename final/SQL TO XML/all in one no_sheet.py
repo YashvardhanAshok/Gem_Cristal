@@ -29,7 +29,9 @@ df = df.replace({0: '', False: ''})
 df.columns = [col.replace('_', ' ').title() if col != 'day_left_formula' else 'Day Left' for col in df.columns]
 
 # Output file
-output_file = "styled_tender_export.xlsx"
+import os
+save_file = os.path.abspath(os.path.join(os.path.dirname(__file__),"xl files")) 
+output_file = f"{save_file}/all in one no_sheet.xlsx"
 
 # Write to a single sheet
 with pd.ExcelWriter(output_file, engine='openpyxl') as writer:

@@ -15,8 +15,8 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "SELECT * FROM tender_data where live = 'Yes' AND Cancel != 'Cancel'"
-query = "SELECT * FROM tender_data where live = 'Yes'"
+query = "SELECT * FROM tender_data where Live = 'Yes' AND Cancel != 'Cancel'"
+query = "SELECT * FROM tender_data where Live = 'Yes' or Live is null"
 df = pd.read_sql(query, conn)
 
 # Columns to remove
@@ -74,6 +74,9 @@ if 'Tender Valu' in cols and 'Ten-Val Word' in cols:
 
 # Output file
 output_file = "styled_tender_export.xlsx"
+import os
+save_file = os.path.abspath(os.path.join(os.path.dirname(__file__),"xl files")) 
+output_file = f"{save_file}/Main.xlsx"
 
 if department_col:
     department_col = department_col.replace('_', ' ').title()
