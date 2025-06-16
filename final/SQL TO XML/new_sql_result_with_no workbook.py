@@ -12,7 +12,7 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "select * from tender_data where department ='ASSAM RIFLES';"
+query = "SELECT * FROM tender_data WHERE id >= 24258 ;"
 df = pd.read_sql(query, conn)
 
 # Drop unnecessary columns

@@ -1,51 +1,45 @@
 import pandas as pd
+import re
+from collections import defaultdict
 import os
-from glob import glob
-import ast
 
-# Define folder path
-folder_path = r'C:\vs_code\TenderHunter2.1.3\final\paladiam\result'
-csv_files = glob(os.path.join(folder_path, '*.csv'))
-df_list = []
+# Define the input file name
+a = 'punjab police'
+csv_path = os.path.join('final', 'paladiam', 'result', f'{a}.csv')
 
-for file in csv_files:
-    df = pd.read_csv(file)
-    
-    # Step 1: Clean result_bid_value
-    if 'result_bid_value' in df.columns:
-        df = df[df['result_bid_value'].notnull()]
-    
-    # Step 2: Clean bid_rank
-    if 'bid_rank' in df.columns:
-        df = df[df['bid_rank'].isnull() | (df['bid_rank'].astype(str).str.strip() == "") | (df['bid_rank'].astype(str).str.upper() == "L1")]
-    
-    df_list.append(df)
+# Read the CSV using the correct path
+df = pd.read_csv(csv_path)
 
-# Combine all cleaned DataFrames
-final_df = pd.concat(df_list, ignore_index=True)
+# Dictionary to store item -> set of ref_nos
+item_dict = defaultdict(set)
 
-### === CSV 1: Count duplicates by title and list unique organisations === ###
-if 'title' in final_df.columns and 'organisation' in final_df.columns:
-    group_df = (
-        final_df.groupby('title')
-        .agg(
-            count=('title', 'count'),
-            organisations=('organisation', lambda x: list(set(x.dropna())))
-        )
-        .reset_index()
-    )
-    group_df.to_csv(os.path.join(folder_path, 'Grouped_Title_Count.csv'), index=False)
+# Loop through each row
+for _, row in df.iterrows():
+    ref_no = row['ref_no']
+    title = row['title'].lower()  # normalize case
 
-### === CSV 2: Extract only first value from ref_no list === ###
-if 'ref_no' in final_df.columns:
-    def extract_first_ref(ref):
-        try:
-            items = ast.literal_eval(ref) if isinstance(ref, str) and ref.startswith("[") else [ref]
-            return items[0] if items else None
-        except:
-            return ref  # fallback if not a list or bad format
+    # Split title by ',', 'and', 'or'
+    items = re.split(r'\s*,\s*|\s+and\s+|\s+or\s+', title)
 
-    final_df['ref_no_first'] = final_df['ref_no'].apply(extract_first_ref)
-    final_df[['ref_no_first']].to_csv(os.path.join(folder_path, 'First_Ref_No_Only.csv'), index=False)
+    # Remove empty strings and duplicates
+    items = set(item.strip() for item in items if item.strip())
 
-print("CSV 1 and CSV 2 created successfully.")
+    # Update dictionary
+    for item in items:
+        item_dict[item].add(ref_no)
+
+# Prepare the result list
+result = []
+for item, refs in item_dict.items():
+    result.append({
+        'item': item,
+        'count': len(refs),
+        'ref_nos': ', '.join(refs)  # convert list to string for Excel readability
+    })
+
+# Convert to DataFrame and save to Excel
+result_df = pd.DataFrame(result)
+excel_filename = f"{a}.xlsx"
+result_df.to_excel(excel_filename, index=False)
+
+print(f"Excel file saved as {excel_filename}")

@@ -204,5 +204,6 @@ def by_address(keywords):
 
 keywords = ["fencing"]
 by_iteam(keywords)
-keywords = ["manipur"]
-by_address(keywords)
+# keywords = ["manipur"]
+# by_address(keywords)
+                                                                                                             

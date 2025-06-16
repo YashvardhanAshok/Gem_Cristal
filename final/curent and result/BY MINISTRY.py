@@ -140,8 +140,6 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                         if chunk:
                             f.write(chunk)
 
-                # print(f"{bid_title.text} for: {download_path}")
-
                 if os.path.exists(download_path):
                     with pdfplumber.open(download_path) as pdf:
                         emd_amount = None
@@ -160,29 +158,23 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                                             if key and 'MSE Purchase Preference' in key and value:
                                                 MSE_value = value
                                                 print()
-                                        except:
-                                            pass
+                                        except: pass
                                         try:
                                             if key and 'Total Quantity' in key and value:
                                                 Total_Quantity = value
-                                        except:
-                                            pass
+                                        except: pass
                                         try:
                                             if key and 'Item Category' in key and value:
                                                 Item_Category = value
-                                        except:
-                                            pass
+                                        except: pass
                                         try:
                                             if key and 'EMD Amount' in key and value:
                                                 emd_amount = float(re.sub(r'[^\d.]', '', value))
                                                 Tender_value = emd_amount * 50
-                                        except:
-                                            pass
+                                        except: pass
                                         try:
-                                            if key and 'ePBG Percentage' in key:
-                                                epbg_percentage = value
-                                        except:
-                                            pass    
+                                            if key and 'ePBG Percentage' in key: epbg_percentage = value
+                                        except: pass    
                                 except:
                                     print('error in EMD Amount')
 
@@ -202,21 +194,19 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                                                 elif "CE" in lines[i]:
                                                     Beneficiary = ["Engineer"]
                                                     break
-                                                elif "CSO" in lines[i]:
+                                                elif ("CSO" in lines[i]) or ("signal" in lines[i]):
                                                     Beneficiary = ["signal"]
                                                     break
                                                     
-                                                elif "Officer" in lines[i]:
-                                                    # Beneficiary = ["signal"]
+                                                elif "signal" in lines[i]:
+                                                    break
+                                                elif "Officer" in lines[i]: 
                                                     # Beneficiary = ["Officer"]
                                                     break
-                            except:
-                                pass
+                            except: pass
                         # if Beneficiary==[]:
-                        #     try:
-                        #         Beneficiary = lines[index+1].split("\n")
-                        #     except:
-                        #         Beneficiary = ['']
+                        #     try: Beneficiary = lines[index+1].split("\n")
+                        #     except: Beneficiary = ['']
 
                         event_data = {}
                         Consignee_Reporting_list = []
@@ -234,60 +224,47 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                                             consignee_value = data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").replace("*", "").strip()
                                             if consignee_value and consignee_value not in Consignee_Reporting_list:
                                                 Consignee_Reporting_list.append(consignee_value)
-                                        except:
-                                            pass
+                                        except: pass
 
                                         try:
                                             address_value = data.get(next((h for h in headers if "Address" in (h or "")), ""), "").replace("*", "").strip()
                                             if address_value and address_value not in Address_list:
                                                 Address_list.append(address_value)
-                                        except:
-                                            pass
+                                        except: pass
 
                         event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
                         event_data["TENDER ID"] = bid_title.text
                         event_data["elementPut"] = element
-                        try:
-                            event_data["ITEM DESCRIPTION"] = title
-                        except:
-                            try:
-                                event_data["ITEM DESCRIPTION"] = Item_Category
-                            except:
-                                pass
-                        try:
-                            if quantity == 0:
-                                event_data["QTY"] = Total_Quantity
-                            else:
-                                event_data["QTY"] = quantity
-                                
-                        except:
-                            pass
-                        
                         event_data["START DATE"] = start_date
                         event_data["END DATE"] = end_date
                         event_data["END Time"] = end_date_time
                         event_data["DAY LEFT"] = ''
                         event_data["EMD AMOUNT"] = emd_amount
                         event_data["TENDER VALUE"] = Tender_value
-                        try:
-                            event_data["ITEM CATEGORY"] = Item_Category
-                            
-                        except:
-                            pass
-                        
                         event_data["Consignee Reporting"] = Consignee_Reporting_list 
                         event_data["ADDRESS"] = Address_list
-
                         event_data["MINISTRY"] = department_address_parts[0]
-                        
                         event_data["DEPARTMENT"] = element
-                        
-                        # event_data["DEPARTMENT"] = department_address_parts[1]
                         event_data["BRANCH"] = Beneficiary[0]
-                        
                         event_data["MSE"] = MSE_value
                         event_data["file_path"] = download_path
                         event_data["link"] = link_href
+                        event_data["epbg_percentage"] = epbg_percentage
+                        
+                        try: event_data["ITEM DESCRIPTION"] = title
+                        except:
+                            try: event_data["ITEM DESCRIPTION"] = Item_Category
+                            except: pass
+                        try:
+                            if quantity == 0: event_data["QTY"] = Total_Quantity
+                            else: event_data["QTY"] = quantity
+                                
+                        except: pass
+
+                        try: event_data["ITEM CATEGORY"] = Item_Category
+                        except: pass
+                        
+                        # event_data["DEPARTMENT"] = department_address_parts[1]
                         return event_data
             
             else:
@@ -439,15 +416,25 @@ def sql(extracted_data):
         cursor.close()
         conn.close()
 
-options = uc.ChromeOptions()
-options.add_argument("--profile-directory=Default") 
-options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
-options.add_argument("--disable-blink-features=AutomationControlled")
 
 gemlog_="gem_log.txt"
+# _uc_temp = uc.Chrome()
+# _uc_temp.quit()
+# uc.Chrome().quit()
 
 def gem_funtion(ministry_name, Organization_name):
-    driver = uc.Chrome(options=options, headless=False)
+    # options = uc.ChromeOptions()
+    # options.add_argument("--no-first-run")
+    # options.add_argument("--no-service-autorun")
+    # options.add_argument("--password-store=basic")
+    # options.add_argument("--disable-blink-features=AutomationControlled")
+
+    # profile_id = Organization_name[0].replace(" ", "_") if Organization_name[0] else "default"
+    # options.add_argument(f"--user-data-dir=C:/temp/profile_{profile_id}")
+    # driver = uc.Chrome(options=options, headless=False)
+
+    driver = webdriver.Edge()
+
     for org_name in Organization_name:
 
         driver.get('https://bidplus.gem.gov.in/advance-search')
@@ -460,7 +447,7 @@ def gem_funtion(ministry_name, Organization_name):
             "Trusted_Connection=yes;"
         )
 
-        query_on = "SELECT * FROM tender_data WHERE department = ? AND live = 'Yes' AND (Cancel IS NULL OR Cancel = '')"
+        query_on = "SELECT * FROM tender_data WHERE department = ? AND (Live = 'Yes' OR Live IS NULL) AND (Cancel IS NULL OR Cancel = '')"
         query_close = "SELECT * FROM tender_data WHERE department = ? AND live = 'No'"
 
         df_on = pd.read_sql(query_on, conn, params=[org_name])
@@ -508,7 +495,7 @@ def gem_funtion(ministry_name, Organization_name):
  
         driver.execute_script("searchBid('ministry-search')")
         
-        card_count = 0 
+        card_count = 1
 
         live_tenders = org_name + ":\n"
         try:
@@ -539,7 +526,7 @@ def gem_funtion(ministry_name, Organization_name):
         
 
         
-        with open('input_file.ext', 'a', encoding='utf-8') as outfile:
+        with open('gemlog_.txt', 'a', encoding='utf-8') as outfile:
             outfile.write(live_tenders + '\n')
         
         try:
@@ -579,7 +566,7 @@ def gem():
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
 
-        MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
+        # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
 
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]

@@ -194,7 +194,7 @@ def bidassist_funtion(past_tender_name):
     MINISTRY = past_tender_name[0]
     department = past_tender_name[1] 
     tenders = []
-    link= f"https://bidassist.com/tender-results/all-tenders/active?utm_source=Google&utm_medium=cpc&utm_campaign=15355181231&utm_term=bidassist&utm_content=Search&gad_source=1&gad_campaignid=15355181231&gbraid=0AAAAADFIc7985V2eOxP4JI_LGnrqH3UTD&gclid=CjwKCAjwo4rCBhAbEiwAxhJlCUSBCFUpAaNSw_RsVaNlJuXaNYW0EOonqHJJFDTfO5yQT3kDuwVWexoCPxwQAvD_BwE&filter=PURCHASER_NAME:Assam%20Rifles&filter=PROCUREMENT_SOURCE:GEM&filter=CONTRACT_DATE:1704047400000%7C&sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2024&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
+    link= f"https://bidassist.com/tender-results/all-tenders/active?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2025&filter=KEYWORD:police&filter=LOCATION_STRING:Assam&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
     driver.get(link)
     sleep(0.1)
     
@@ -223,7 +223,7 @@ def bidassist_funtion(past_tender_name):
 
 
 
-past_tender_name=["MINISTRY OF HOME AFFAIRS","ASSAM RIFLES"]
+past_tender_name=["POLICE","ASSAM"]
     
 # bidassist_funtion(past_tender_name,iteams)
 bidassist_funtion(past_tender_name)
