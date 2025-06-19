@@ -16,12 +16,12 @@ conn = pyodbc.connect(
 
 # Fetch data
 query = "SELECT * FROM tender_data where Live = 'Yes' AND Cancel != 'Cancel'"
-query = "SELECT * FROM tender_data where Live = 'Yes' or Live is null"
+# query = "SELECT * FROM tender_data where Live = 'Yes' or Live is null"
 df = pd.read_sql(query, conn)
 
 # Columns to remove
 columns_to_drop = ['id', 'matches', 'matched_products', "element_put","Cancel", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
-columns_to_drop = ['id', 'matches', 'matched_products', "element_put", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
+columns_to_drop = ['id',"Cancel","Department", 'matches', 'matched_products', "element_put", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
 for col in columns_to_drop:
     if col in df.columns:
         df = df.drop(columns=col)
@@ -112,6 +112,8 @@ if department_col:
 
         # Print settings
         ws.print_title_rows = '1:2'
+        ws.page_setup.fitToWidth = 1
+        
 
         # Add top title
         sheet_title = f"{sheet_name} – Exported on {current_date}"
@@ -138,7 +140,7 @@ if department_col:
 
         # Header styling
         header_fill = PatternFill(start_color="bdbdbd", end_color="bdbdbd", fill_type="solid")
-        bold_font = Font(bold=True, size=18)
+        bold_font = Font(bold=True, size=20)
         for cell in ws[2]:
             cell.fill = header_fill
             cell.font = bold_font
@@ -147,9 +149,9 @@ if department_col:
 
         # Data row styling
         for row_idx, row in enumerate(ws.iter_rows(min_row=3, max_row=ws.max_row), start=3):
-            ws.row_dimensions[row_idx].height = 120
+            # ws.row_dimensions[row_idx].height = 120
             for idx, cell in enumerate(row):
-                cell.font = Font(size=18,bold=True)
+                cell.font = Font(size=20,bold=True)
                 cell.border = thin_border
                 cell.alignment = centered_wrap_alignment
 
@@ -159,7 +161,7 @@ if department_col:
                     i_col = 'F'
                     formula = f'=IF((INDIRECT("{h_col}"&ROW())+INDIRECT("{i_col}"&ROW()))-NOW() <= 0, "CLOSED", INT((INDIRECT("{h_col}"&ROW())+INDIRECT("{i_col}"&ROW()))-NOW()) & " days")'
                     cell.value = formula
-                    cell.font = Font(size=18, color="FF0000")
+                    # cell.font = Font(size=18, color="FF0000")
 
         # Column width adjustments
         for col_idx, col_cell in enumerate(ws[2], start=1):
