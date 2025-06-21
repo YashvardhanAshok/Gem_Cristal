@@ -16,12 +16,13 @@ conn = pyodbc.connect(
 
 # Fetch data
 query = "SELECT * FROM tender_data where Live = 'Yes' AND Cancel != 'Cancel'"
-# query = "SELECT * FROM tender_data where Live = 'Yes' or Live is null"
+query = "SELECT * FROM tender_data where Live = 'Yes' or Live is null"
 df = pd.read_sql(query, conn)
 
 # Columns to remove
-columns_to_drop = ['id', 'matches', 'matched_products', "element_put","Cancel", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
-columns_to_drop = ['id',"Cancel","Department", 'matches', 'matched_products', "element_put", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
+columns_to_drop = ['id', 'matches', 'matched_products', "element_put", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
+columns_to_drop = ['id', 'matches', 'matched_products', "element_put", "consignee_reporting",  "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
+# columns_to_drop = ['id',"Cancel","Department", 'matches', 'matched_products', "element_put", "consignee_reporting", "item_category", "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
 for col in columns_to_drop:
     if col in df.columns:
         df = df.drop(columns=col)

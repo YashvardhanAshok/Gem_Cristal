@@ -98,14 +98,14 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
 
         try:
             item_element = driver.find_element(By.XPATH, "//strong[text()='Items:']/parent::div")
-            title = item_element.text.replace("Items:", "").strip()
+            from_card_discription = item_element.text.replace("Items:", "").strip()
         except:
             titles = []
             try:
                 for card_element in card_elements:
                     text = card_element.text
                     if text.startswith(bid_title.text):
-                        title = titles.append(text)
+                        from_card_discription = titles.append(text)
             except: pass
         if bid_title.text in gem_ids_copy:
             try: gem_ids.remove(bid_title.text)
@@ -131,6 +131,7 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                 
             except requests.exceptions.RequestException as e:
                 return
+            sleep(1.1)
             
             if os.path.exists(download_path):
                 with pdfplumber.open(download_path) as pdf:
@@ -139,130 +140,84 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                     Tender_value = None
                     MSE_value = None
                     Beneficiary = ['NA']
-                    for page in pdf.pages:
-                        tables = page.extract_tables()
-                        Beneficiary_find = page.extract_Beneficiary_find()
-                        for section in tables:
-                            try:
-                                for row in section:
-                                    key = row[0]
-                                    value = row[1]
-                                    try:
-                                        if key and 'MSE Purchase Preference' in key and value:
-                                            MSE_value = value
-                                            print()
-                                    except: pass
-                                    try:
-                                        if key and 'Total Quantity' in key and value:
-                                            Total_Quantity = value
-                                    except: pass
-                                    try:
-                                        if key and 'Item Category' in key and value:
-                                            title = value
-                                    except: pass
-                                    try:
-                                        if key and 'Item Category' in key and value:
-                                            Item_Category = value
-                                    except: pass
-                                    try:
-                                        if key and 'EMD Amount' in key and value:
-                                            emd_amount = float(re.sub(r'[^\d.]', '', value))
-                                            Tender_value = emd_amount * 50
-                                    except: pass
-                                    try:
-                                        if key and 'ePBG Percentage' in key: epbg_percentage = value
-                                    except: pass    
-                            except:
-                                print('error in EMD Amount')
-
-                        try:
-                            if "Beneficiary" in Beneficiary_find:
-                                lines = Beneficiary_find.split('\n')
-                                for line in lines:
-                                    if "Beneficiary" in line:
-                                        index = lines.index(line)
-                                        for i in range(index + 1, index + 4):
-                                            if "Provn" in lines[i]:
-                                                Beneficiary = ["Provn"]
-                                                break
-                                                
-                                            elif "CE" in lines[i]:
-                                                Beneficiary = ["Engineer"]
-                                                break
-                                            elif ("CSO" in lines[i]) or ("signal" in lines[i]):
-                                                Beneficiary = ["signal"]
-                                                break
-                                                
-                                            elif "signal" in lines[i]:
-                                                Beneficiary = ["signal"]
-                                                break
-                                            
-                                            elif "Officer" in lines[i]: 
-                                                # Beneficiary = ["Officer"]
-                                                break
-                        except: pass
-                    # if Beneficiary==[]:
-                    #     try: Beneficiary = lines[index+1].split("\n")
-                    #     except: Beneficiary = ['']
-
-
-
-                    for page in pdf.pages:
-                        text = page.extract_text()
-                        try:
-                            if "Beneficiary" in text:
-                                lines = text.split('\n')
-                                for line in lines:
-                                    if "Beneficiary" in line:
-                                        index = lines.index(line)
-                                        for i in range(index + 1, index + 4):
-                                            if "Provn" in lines[i]:
-                                                Beneficiary = ["Provn"]
-                                                break
-                                                
-                                            elif "CE" in lines[i]:
-                                                Beneficiary = ["Engineer"]
-                                                break
-                                            elif ("CSO" in lines[i]) or ("signal" in lines[i]):
-                                                Beneficiary = ["signal"]
-                                                break
-                                                
-                                            elif "signal" in lines[i]:
-                                                Beneficiary = ["signal"]
-                                                break
-                                            
-                                            elif "Officer" in lines[i]: 
-                                                # Beneficiary = ["Officer"]
-                                                break
-                        except: pass
-                    # if Beneficiary==[]:
-                    #     try: Beneficiary = lines[index+1].split("\n")
-                    #     except: Beneficiary = ['']
-
-                    event_data = {}
                     Consignee_Reporting_list = []
                     Address_list = []
+                    Capacity_Value = []
+                    Not_Beneficiary_Found = True
+
                     for page in pdf.pages:
-                        tables = page.extract_tables()
-                        for table in tables:
-                            headers = table[0]
-                            if any("S.No" in (cell or "") for cell in headers):
-                                for row in table[1:]:
-                                    row = row + [""] * (len(headers) - len(row))
-                                    data = dict(zip(headers, row))
+                        try:
+                            tables = page.extract_tables()
+                            for table in tables:
+                                if not table:
+                                    continue
+                                headers = table[0]
+                                for i, row in enumerate(table[1:] if headers and any("S.No" in (cell or "") for cell in headers) else table):
+                                    row = [(cell or "").strip() for cell in row]
                                     
-                                    try:
-                                        consignee_value = data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "").replace("*", "").strip()
-                                        if consignee_value and consignee_value not in Consignee_Reporting_list:
-                                            Consignee_Reporting_list.append(consignee_value)
-                                    except: pass
+                                    data = {}
+                                    if headers and len(headers) == len(row):
+                                        data = dict(zip(headers, row))
+                                    
+                                    consignee = data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "")
+                                    if consignee and consignee not in Consignee_Reporting_list:
+                                        Consignee_Reporting_list.append(consignee.replace("*", "").strip())
 
-                                    try:
-                                        address_value = data.get(next((h for h in headers if "Address" in (h or "")), ""), "").replace("*", "").strip()
-                                        if address_value and address_value not in Address_list:
-                                            Address_list.append(address_value)
-                                    except: pass
+                                    address = data.get(next((h for h in headers if "Address" in (h or "")), ""), "")
+                                    if address and address not in Address_list:
+                                        Address_list.append(address.replace("*", "").strip())
 
+                                    for j, cell in enumerate(row):
+                                        if "Nominal Rated Capacity" in cell and j + 1 < len(row):
+                                            Capacity_Value.append(row[j + 1])
+
+                                    if len(row) >= 2:
+                                        key, value = row[0], row[1]
+                                        if "MSE Purchase Preference" in key and value:
+                                            MSE_value = value
+                                        elif "Total Quantity" in key and value:
+                                            Total_Quantity = value
+                                        elif "Item Category" in key and value:
+                                            Item_Category = value
+                                        elif "EMD Amount" in key and value:
+                                            try:
+                                                emd_amount = float(re.sub(r'[^\d.]', '', value))
+                                                Tender_value = emd_amount * 50
+                                            except:
+                                                pass
+                                        elif "ePBG Percentage" in key:
+                                            epbg_percentage = value
+                                            
+                        except Exception as e:
+                            print(f"Error in table parsing: {e}")
+
+                        try:
+                            if (Not_Beneficiary_Found):
+                                text = page.extract_text()
+                                if "Beneficiary" in text:
+                                    lines = text.split('\n')
+                                    for idx, line in enumerate(lines):
+                                        if "Beneficiary" in line:
+                                            for next_line in lines[idx+1:idx+4]:
+                                                if "Provn" in next_line:
+                                                    Beneficiary = ["Provn"]
+                                                    Not_Beneficiary_Found = False
+                                                
+                                                elif "CE" in next_line:
+                                                    Beneficiary = ["Engineer"]
+                                                    Not_Beneficiary_Found = False
+
+                                                elif "CSO" in next_line:
+                                                    Beneficiary = ["signal"]
+                                                    Not_Beneficiary_Found = False
+
+                                                elif "Officer" in next_line:
+                                                    Not_Beneficiary_Found = False
+
+                                            break
+                        except:
+                            pass
+                    event_data={}
                     event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
                     event_data["TENDER ID"] = bid_title.text
                     event_data["elementPut"] = element
@@ -282,19 +237,15 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                     event_data["link"] = link_href
                     event_data["epbg_percentage"] = epbg_percentage
                     
-                    try: event_data["ITEM DESCRIPTION"] = title
+                    try:event_data["ITEM CATEGORY"] = event_data["ITEM DESCRIPTION"] = Item_Category
                     except:
-                        try: event_data["ITEM DESCRIPTION"] = Item_Category
+                        try: event_data["ITEM DESCRIPTION"] = from_card_discription
                         except: pass
                     try:
                         if quantity == 0: event_data["QTY"] = Total_Quantity
                         else: event_data["QTY"] = quantity
                             
                     except: pass
-
-                    try: event_data["ITEM CATEGORY"] = Item_Category
-                    except: pass
-                    
                     # event_data["DEPARTMENT"] = department_address_parts[1]
                     return event_data
         
@@ -538,7 +489,7 @@ def gem_funtion(ministry_name, Organization_name):
 
         live_tenders = org_name + ":\n"
         try:
-            for page_no in range(9999):
+            for page_no in range(999):
              
                 try:
                     card_elements = WebDriverWait(driver, 30).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'card')))
@@ -605,7 +556,7 @@ def gem():
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
 
-        # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
+        MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
 
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
