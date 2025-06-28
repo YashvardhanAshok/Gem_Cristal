@@ -15,8 +15,7 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "SELECT * FROM tender_data where Live = 'Yes' AND Cancel != 'Cancel'"
-query = "SELECT * FROM tender_data where Live = 'Yes' or Live is null"
+query = "SELECT * FROM tender_data where AND (end_date >= CAST(GETDATE() AS DATE)) AND (Cancel IS NULL OR Cancel = '');"
 df = pd.read_sql(query, conn)
 
 # Columns to remove

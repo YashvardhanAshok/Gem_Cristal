@@ -160,8 +160,8 @@ def by_address(keywords):
     print(f"✅ Filtered data exported successfully to {output_file} with all formatting applied.")
 
 
-# keywords = ["fencing"]
-# by_iteam(keywords)
+keywords = "nano drone"
+by_iteam(keywords)
 
 # 
 # 
@@ -173,8 +173,8 @@ def by_address(keywords):
 # 
 # 
 
-keywords = ["Manipur","UKHRUL","IMPHAL WEST","BISHNUPUR","CHANDEL","CHURACHANDPUR","IMPHAL","SENAPATI","TAMENGLONG","THOUBAL","UKHRUL"]
-by_address(keywords)
+# keywords = ["Manipur","UKHRUL","IMPHAL WEST","BISHNUPUR","CHANDEL","CHURACHANDPUR","IMPHAL","SENAPATI","TAMENGLONG","THOUBAL","UKHRUL"]
+# by_address(keywords)
 
 
     

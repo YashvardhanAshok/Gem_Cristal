@@ -194,7 +194,7 @@ def bidassist_funtion(past_tender_name):
     MINISTRY = past_tender_name[0]
     department = past_tender_name[1] 
     tenders = []
-    link= f"https://bidassist.com/tender-results/all-tenders/active?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2025&filter=KEYWORD:police&filter=LOCATION_STRING:Assam&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
+    link= f"https://bidassist.com/tender-results/all-tenders/active?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2025&filter=KEYWORD:Transformer&filter=PURCHASER_NAME:Eastern%20Railway&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
     driver.get(link)
     sleep(0.1)
     
@@ -217,7 +217,10 @@ def bidassist_funtion(past_tender_name):
         # break
 
     print(tenders)
-    sql(tenders)
+    file_path = r'C:\vs_code\TenderHunter2.1.3\final\blast_from_past\tender_ids.txt'
+    with open(file_path, 'a', encoding='utf-8') as outfile:
+        outfile.write(str(tenders) + "\n")
+    # sql(tenders)
     driver.quit()
     
 

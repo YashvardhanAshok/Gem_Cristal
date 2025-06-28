@@ -3,7 +3,6 @@ import pandas as pd
 import ast
 from datetime import datetime
 
-# Connect to SQL Server
 conn = pyodbc.connect(
     "DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=localhost\\SQLEXPRESS;"
@@ -11,21 +10,16 @@ conn = pyodbc.connect(
     "Trusted_Connection=yes;"
 )
 
-# Fetch data
-query = "SELECT * FROM tender_data WHERE id >= 24258 ;"
+query = "SELECT * FROM tender_data"
 df = pd.read_sql(query, conn)
 
-# Drop unnecessary columns
 columns_to_drop = [
-    'id', 'matches', 'matched_products', "element_put", "consignee_reporting", "item_category",
-    "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "Cancel", "L1_update"
+    'id', 'matches', 'matched_products', "element_put", "consignee_reporting","date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "Cancel", "L1_update"
 ]
 df.drop(columns=[col for col in columns_to_drop if col in df.columns], inplace=True)
 
-# Replace 0s with empty strings
 df.replace(0, '', inplace=True)
 
-# Expand L_Placeholder column
 def expand_l_placeholder(row):
     try:
         val = row.get("L_Placeholder") or row.get("L Placeholder")
@@ -43,10 +37,8 @@ if "L_Placeholder" in df.columns:
     expanded = df.apply(expand_l_placeholder, axis=1, result_type='expand')
     df = pd.concat([df.drop(columns=["L_Placeholder"]), expanded], axis=1)
 
-# Normalize and rename columns
 df.columns = [col.replace('_', ' ').title() if col != 'day_left_formula' else 'Day Left' for col in df.columns]
 
-# Compute 'Day Left' from 'Start Date' and 'End Date' if present
 if 'Start Date' in df.columns and 'End Date' in df.columns:
     try:
         df['Start Date'] = pd.to_datetime(df['Start Date'], errors='coerce')
@@ -56,7 +48,6 @@ if 'Start Date' in df.columns and 'End Date' in df.columns:
     except Exception:
         pass
 
-# Identify department column
 department_col = next((col for col in df.columns if col.strip().lower() == "department"), None)
 
 import os

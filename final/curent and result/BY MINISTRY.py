@@ -41,6 +41,23 @@ import traceback
 import requests
 from datetime import datetime
 import pyodbc
+# import close_date_caculate
+conn = pyodbc.connect(
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=localhost\\SQLEXPRESS;"
+    "DATABASE=gem_tenders;"
+    "Trusted_Connection=yes;"
+)
+
+total_gem_ids_q = '''
+SELECT * 
+FROM tender_data 
+'''
+
+total_gem_ids_df = pd.read_sql(total_gem_ids_q, conn)
+conn.close()
+
+all_gem_ids = total_gem_ids_df['tender_id'].tolist()
 
 
  
@@ -51,6 +68,7 @@ import pyodbc
  
 
 def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,gem_ids_copy):
+    global all_gem_ids
     # scroll
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
     sleep(0.01)
@@ -72,14 +90,12 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
         end_date = convert_date_format(closing_date_parts[0])
         end_date_time = closing_date_parts[1] + " " + closing_date_parts[2]
         
-        
         try:
             quantity_element = card.find_element(By.XPATH, ".//div[contains(@class, 'col-md-4')]//div[contains(text(), 'Quantity')]")
             quantity_text = quantity_element.text.strip()
             if "Quantity:" in quantity_text:
                 quantity = quantity_text.split("Quantity:")[-1].strip()
-            else:
-                quantity = 0
+            else: quantity = 0
 
         except:
             quantity = 0
@@ -119,140 +135,182 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
         print(f"New tender:{bid_title.text} and started at: {start_date}")
 
         try:
-            try:
-                driver.execute_script("window.open(arguments[0]);", link_href)
-                download_dir = os.path.join(os.getcwd(), 'download_pdf')
-                os.makedirs(download_dir, exist_ok=True)
-                latest_file = max(
-                    [os.path.join(download_dir, f) for f in os.listdir(download_dir)],
-                    key=os.path.getctime,
-                )
-                download_path = latest_file
-                
-            except requests.exceptions.RequestException as e:
-                return
-            sleep(1.1)
+            bid_id_no = link_href.split('/')[-1]
+            download_path = f'C:\\vs_code\\TenderHunter2.1.3\\download_pdf\\GeM-Bidding-{bid_id_no}.pdf'
+            
+            
+            if os.path.exists(download_path): 
+                print(f"have file for: {bid_id_no}")
+                try:
+                    if bid_title.text in all_gem_ids:
+                        all_gem_ids.append(bid_title.text)
+                        print(f"alrady in db: {bid_title.text}")
+                        return 
+                except: pass
+            
+            else:
+                try:
+                    driver.execute_script("window.open(arguments[0]);", link_href)
+                    download_dir = os.path.join(os.getcwd(), 'download_pdf')
+                    os.makedirs(download_dir, exist_ok=True)
+                    latest_file = max(
+                        [os.path.join(download_dir, f) for f in os.listdir(download_dir)],
+                        key=os.path.getctime,
+                    )
+                    download_path = latest_file
+                    
+                except requests.exceptions.RequestException as e:
+                    return
+                sleep(1.1)
+            
+            
             
             if os.path.exists(download_path):
-                with pdfplumber.open(download_path) as pdf:
-                    emd_amount = None
-                    epbg_percentage = None
-                    Tender_value = None
-                    MSE_value = None
-                    Beneficiary = ['NA']
-                    Consignee_Reporting_list = []
-                    Address_list = []
-                    Capacity_Value = []
-                    Not_Beneficiary_Found = True
+                try:
+                    with pdfplumber.open(download_path) as pdf:
+                        emd_amount = None
+                        epbg_percentage = None 
+                        Tender_value = None 
+                        MSE_value = None
+                        Beneficiary = ['NA']
+                        Address_list = []
+                        Consignee_Reporting_list = []
+                        Not_Beneficiary_Found = True
+                        Item_Category=''
 
-                    for page in pdf.pages:
-                        try:
-                            tables = page.extract_tables()
-                            for table in tables:
-                                if not table:
-                                    continue
-                                headers = table[0]
-                                for i, row in enumerate(table[1:] if headers and any("S.No" in (cell or "") for cell in headers) else table):
-                                    row = [(cell or "").strip() for cell in row]
-                                    
-                                    data = {}
-                                    if headers and len(headers) == len(row):
-                                        data = dict(zip(headers, row))
-                                    
-                                    consignee = data.get(next((h for h in headers if "Consignee" in (h or "")), ""), "")
-                                    if consignee and consignee not in Consignee_Reporting_list:
-                                        Consignee_Reporting_list.append(consignee.replace("*", "").strip())
+                        for page in pdf.pages:
+                            try:
+                                tables = page.extract_tables()
+                                for table in tables:
+                                    if not table or len(table) < 2: continue
 
-                                    address = data.get(next((h for h in headers if "Address" in (h or "")), ""), "")
-                                    if address and address not in Address_list:
-                                        Address_list.append(address.replace("*", "").strip())
-
-                                    for j, cell in enumerate(row):
-                                        if "Nominal Rated Capacity" in cell and j + 1 < len(row):
-                                            Capacity_Value.append(row[j + 1])
-
-                                    if len(row) >= 2:
-                                        key, value = row[0], row[1]
-                                        if "MSE Purchase Preference" in key and value:
-                                            MSE_value = value
-                                        elif "Total Quantity" in key and value:
-                                            Total_Quantity = value
-                                        elif "Item Category" in key and value:
-                                            Item_Category = value
-                                        elif "EMD Amount" in key and value:
-                                            try:
-                                                emd_amount = float(re.sub(r'[^\d.]', '', value))
-                                                Tender_value = emd_amount * 50
-                                            except:
-                                                pass
-                                        elif "ePBG Percentage" in key:
-                                            epbg_percentage = value
+                                    for row in table[1:]:
+                                        if len(row) >= 2:
+                                            key, value = row[0], row[1]
                                             
-                        except Exception as e:
-                            print(f"Error in table parsing: {e}")
+                                            try: 
+                                                if ("MSE Purchase Preference" in key or "MSE Purchase Preference" in value) or \
+                                                    ("MSE Exemption for Years Of Experience" in key or "MSE Exemption for Years Of Experience" in value):
+                                                    MSE_value = value
 
-                        try:
-                            if (Not_Beneficiary_Found):
-                                text = page.extract_text()
-                                if "Beneficiary" in text:
-                                    lines = text.split('\n')
-                                    for idx, line in enumerate(lines):
-                                        if "Beneficiary" in line:
-                                            for next_line in lines[idx+1:idx+4]:
-                                                if "Provn" in next_line:
-                                                    Beneficiary = ["Provn"]
-                                                    Not_Beneficiary_Found = False
-                                                
-                                                elif "CE" in next_line:
-                                                    Beneficiary = ["Engineer"]
-                                                    Not_Beneficiary_Found = False
+                                            except: pass
+                                            
+                                            try: 
+                                                if "Total Quantity" in key and value: Total_Quantity = value
+                                            except: pass
+                                            
+                                            try: 
+                                                if "Item Category" in key and value: Item_Category = value
+                                            except: pass
+                                            
+                                            try:
+                                                if key and "EMD Amount" in key and value:
+                                                    try:
+                                                        emd_amount = float(re.sub(r'[^\d.]', '', value))
+                                                        Tender_value = emd_amount * 50
+                                                    except: pass
+                                            except: pass
+                                            
+                                            try:
+                                                if key and "Estimated Bid Value" in key and value: Tender_value = value
+                                            except: pass
+                                            
+                                            try:
+                                                if "ePBG Percentage" in key: epbg_percentage = value
+                                            except: pass
+                                            
+                                            
+                                    headers = [cell.strip() if cell else "" for cell in table[0]]
+                                    if (any("Consignee" in h for h in headers)):
+                                        try:
+                                            data = dict(zip(headers, row))
+                                            address = data.get(next((h for h in headers if "Address" in h), ""), "")
+                                            consignee = data.get(next((h for h in headers if "Consignee" in h), ""), "")
+                                            try: consignee = consignee.replace("*", "").strip()
+                                            except: pass
+                                            if consignee and consignee not in Consignee_Reporting_list:
+                                                Consignee_Reporting_list.append(consignee)
 
-                                                elif "CSO" in next_line:
-                                                    Beneficiary = ["signal"]
-                                                    Not_Beneficiary_Found = False
+                                            address = data.get(next((h for h in headers if "Address" in h), ""), "")
+                                            try: address = address.replace("*", "").strip()
+                                            except: pass
+                                            if address and address not in Address_list:
+                                                Address_list.append(address)
+                                        except: pass
+                                            
+                            except Exception as e:
+                                traceback.print_exc()
 
-                                                elif "Officer" in next_line:
-                                                    Not_Beneficiary_Found = False
+                            try:
+                                if (Not_Beneficiary_Found):
+                                    text = page.extract_text()
+                                    if "Beneficiary" in text:
+                                        lines = text.split('\n')
+                                        for idx, line in enumerate(lines):
+                                            if "Beneficiary" in line:
+                                                for next_line in lines[idx+1:idx+4]:
+                                                    if "Provn" in next_line:
+                                                        Beneficiary = ["Provn"]
+                                                        Not_Beneficiary_Found = False
+                                                    
+                                                    elif "CE" in next_line:
+                                                        Beneficiary = ["Engineer"]
+                                                        Not_Beneficiary_Found = False
 
-                                            break
+                                                    elif "CSO" in next_line:
+                                                        Beneficiary = ["signal"]
+                                                        Not_Beneficiary_Found = False
+
+                                                    elif "Officer" in next_line:
+                                                        Not_Beneficiary_Found = False
+
+                                                break
+                            except: pass
+
+                        if Item_Category =='': 
+                            print(f"error in finding Item_Category for: {bid_title.text}")
+                            return
+                        
+                        event_data={}
+                        event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
+                        event_data["TENDER ID"] = bid_title.text
+                        event_data["elementPut"] = element
+                        event_data["START DATE"] = start_date
+                        event_data["END DATE"] = end_date
+                        event_data["END Time"] = end_date_time
+                        event_data["DAY LEFT"] = ''
+                        event_data["EMD AMOUNT"] = emd_amount
+                        event_data["TENDER VALUE"] = Tender_value
+                        event_data["Consignee Reporting"] = Consignee_Reporting_list 
+                        event_data["ADDRESS"] = Address_list
+                        event_data["MINISTRY"] = department_address_parts[0]
+                        event_data["DEPARTMENT"] = element
+                        event_data["BRANCH"] = Beneficiary[0]
+                        event_data["MSE"] = MSE_value
+                        event_data["file_path"] = download_path
+                        event_data["link"] = link_href
+                        event_data["epbg_percentage"] = epbg_percentage
+                        
+                        try:event_data["ITEM CATEGORY"] = event_data["ITEM DESCRIPTION"] = Item_Category
                         except:
-                            pass
-                    event_data={}
-                    event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
-                    event_data["TENDER ID"] = bid_title.text
-                    event_data["elementPut"] = element
-                    event_data["START DATE"] = start_date
-                    event_data["END DATE"] = end_date
-                    event_data["END Time"] = end_date_time
-                    event_data["DAY LEFT"] = ''
-                    event_data["EMD AMOUNT"] = emd_amount
-                    event_data["TENDER VALUE"] = Tender_value
-                    event_data["Consignee Reporting"] = Consignee_Reporting_list 
-                    event_data["ADDRESS"] = Address_list
-                    event_data["MINISTRY"] = department_address_parts[0]
-                    event_data["DEPARTMENT"] = element
-                    event_data["BRANCH"] = Beneficiary[0]
-                    event_data["MSE"] = MSE_value
-                    event_data["file_path"] = download_path
-                    event_data["link"] = link_href
-                    event_data["epbg_percentage"] = epbg_percentage
-                    
-                    try:event_data["ITEM CATEGORY"] = event_data["ITEM DESCRIPTION"] = Item_Category
-                    except:
-                        try: event_data["ITEM DESCRIPTION"] = from_card_discription
+                            try: event_data["ITEM DESCRIPTION"] = from_card_discription
+                            except: pass
+                        try:
+                            if quantity == 0: event_data["QTY"] = Total_Quantity
+                            else: event_data["QTY"] = quantity
+                                
                         except: pass
-                    try:
-                        if quantity == 0: event_data["QTY"] = Total_Quantity
-                        else: event_data["QTY"] = quantity
-                            
-                    except: pass
-                    # event_data["DEPARTMENT"] = department_address_parts[1]
-                    return event_data
-        
+                        # event_data["DEPARTMENT"] = department_address_parts[1]
+                        return event_data
+                except:
+                    if os.path.exists(download_path):
+                        os.remove(download_path)
+                        print(f"Corrupt PDF removed. Re-downloading might help.: {bid_title.text}")
+            
             else:
                 print(f"ERORROROROROOROROROROROROROROROORORORR\nLink is not a downloadable file or not found: {link_href}")
         except:
-            # traceback.print_exc()
+            traceback.print_exc()
             try:
                 gem_ids.remove(bid_title.text)
             except:pass
@@ -329,8 +387,7 @@ def sql(extracted_data):
             cursor.execute("SELECT COUNT(*) FROM tender_data WHERE tender_id = ?", (tender_id,))
             exists = cursor.fetchone()[0]
 
-            try:
-                end_date = datetime.strptime(tender_data["END DATE"], "%d-%b-%Y").date()
+            try: end_date = datetime.strptime(tender_data["END DATE"], "%d-%b-%Y").date()
             except:
                 print(f"Invalid END DATE for tender {tender_id}: {tender_data.get('END DATE')}")
                 end_date = None
@@ -400,22 +457,8 @@ def sql(extracted_data):
 
 
 gemlog_="gem_log.txt"
-# _uc_temp = uc.Chrome()
-# _uc_temp.quit()
-# uc.Chrome().quit()
-
 from selenium.webdriver.chrome.options import Options
 def gem_funtion(ministry_name, Organization_name):
-    # options = uc.ChromeOptions()
-    # options.add_argument("--no-first-run")
-    # options.add_argument("--no-service-autorun")
-    # options.add_argument("--password-store=basic")
-    # options.add_argument("--disable-blink-features=AutomationControlled")
-
-    # profile_id = Organization_name[0].replace(" ", "_") if Organization_name[0] else "default"
-    # options.add_argument(f"--user-data-dir=C:/temp/profile_{profile_id}")
-    # driver = uc.Chrome(options=options, headless=False)
-   
     options = Options()
     prefs = {
         "download.default_directory": os.path.join(os.getcwd(), "download_pdf"),
@@ -437,8 +480,21 @@ def gem_funtion(ministry_name, Organization_name):
             "Trusted_Connection=yes;"
         )
 
-        query_on = "SELECT * FROM tender_data WHERE department = ? AND (Live = 'Yes' OR Live IS NULL) AND (Cancel IS NULL OR Cancel = '')"
-        query_close = "SELECT * FROM tender_data WHERE department = ? AND live = 'No'"
+        query_on = '''
+        SELECT * 
+        FROM tender_data 
+        WHERE department = ? 
+        AND (end_date > CAST(GETDATE() AS DATE)) 
+        AND (Cancel IS NULL OR Cancel = '');
+        '''
+
+        query_close = '''
+        SELECT * 
+        FROM tender_data 
+        WHERE department = ? 
+        AND end_date < CAST(GETDATE() AS DATE);
+        '''
+
 
         df_on = pd.read_sql(query_on, conn, params=[org_name])
         df_close = pd.read_sql(query_close, conn, params=[org_name])
@@ -538,7 +594,7 @@ def gem_funtion(ministry_name, Organization_name):
 
 def gem():
     try:
-        max_threads = 3
+        max_threads = 4
         threads = []
 
         MINISTRY_list = [
@@ -556,7 +612,8 @@ def gem():
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
 
-        MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
+        # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
+        MINISTRY_list =  [["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]]]
 
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
