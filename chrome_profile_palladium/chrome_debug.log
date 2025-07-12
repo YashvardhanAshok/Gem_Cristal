@@ -1,10 +1,9 @@
-[11016:3720:0712/151933.450:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
-[17912:29636:0712/151933.579:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
-[17912:29636:0712/151933.580:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
-[17932:26456:0712/151933.587:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[25176:25192:0712/151933.592:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[27824:20632:0712/151934.079:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[16784:20244:0712/151934.315:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[11016:27448:0712/151938.334:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[28676:27016:0712/151951.167:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
-[28676:27016:0712/151951.167:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
+[27924:23088:0712/183243.076:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
+[24912:7656:0712/183243.225:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[27076:2424:0712/183243.225:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[19264:30532:0712/183243.233:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
+[19264:30532:0712/183243.235:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
+[14176:4312:0712/183244.093:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[27924:3080:0712/183247.891:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[29868:26292:0712/183306.367:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
+[29868:26292:0712/183306.367:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
