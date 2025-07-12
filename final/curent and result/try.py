@@ -47,7 +47,7 @@ import pyodbc
  
 
  
- 
+count = 0
  
 download_path=r'C:\vs_code\TenderHunter2.1.3\download_pdf\GeM-Bidding-7973162.pdf'
    
@@ -153,20 +153,9 @@ if os.path.exists(download_path):
         
         try:event_data["ITEM CATEGORY"] = event_data["ITEM DESCRIPTION"] = Item_Category
         except:pass
-        
+        count += 1
+        print(count)
             
 print(event_data)
         
     
-{'DATE OF SEARCH': '26-Jun-2025', 
- 'DAY LEFT': '', 
- 'EMD AMOUNT': 180295.0, 
- 'TENDER VALUE': 9014750.0, 
- 'Consignee Reporting': ['Anil Kumar K M'], 
- 'ADDRESS': ['793010,HQ Directorate General\nAssam Rifles, Laitkor Shillong-\n793010'], 
- 'BRANCH': 'NA', 
- 'MSE': None, 
- 'file_path': 'C:\\vs_code\\TenderHunter2.1.3\\download_pdf\\GeM-Bidding-7973162.pdf', 
- 'epbg_percentage': None, 
- 'ITEM CATEGORY': 'Goods Transport Service – Per Trip based Service - Open\nWater; Water Tank Truck; Heavy Tanker', 
- 'ITEM DESCRIPTION': 'Goods Transport Service – Per Trip based Service - Open\nWater; Water Tank Truck; Heavy Tanker'}

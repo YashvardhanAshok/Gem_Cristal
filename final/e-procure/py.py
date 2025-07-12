@@ -188,7 +188,6 @@ def e_procure(ministry_name, Organization_name):
         "MINISTRY OF DEFENCE": ["INDIAN AIR FORCE", "BORDER ROAD ORGANISATION", "INDIAN ARMY", "INDIAN NAVY"]
     }
 
-    # Flatten ministry list for lookup
     ministry_lookup = {}
     for ministry, departments in ministry_mapping.items():
         for dept in departments:

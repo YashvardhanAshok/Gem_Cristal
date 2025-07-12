@@ -1,0 +1,124 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,500&display=swap'); */
+/* font-family: 'Bricolage Grotesque', sans-serif; */
+@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+/* font-family: 'Lato', sans-serif; */
+
+/* ::-webkit-scrollbar {
+  width: 10px;
+} */
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--card); 
+  border-radius: 3vh;
+  
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(52, 58, 67); 
+}
+
+.dark {
+  --gemtextcard_2:rgba(176, 176, 176, 0.436);
+  --background: rgb(17, 24, 39);
+  --card: rgb(31, 41, 55);
+  --textcard: rgb(225, 225, 225);
+  --textcard_2: rgba(225, 225, 225, 0.49);
+  --textcard_3: rgba(255, 255, 255, 0.711);
+  --webbox_colorBack: rgba(16, 31, 52, 0.647);
+  --subox:white;
+  --suboxtext:rgb(41, 51, 64);
+  --leftcardbox:white;
+  --dayandnightmode:white;
+}
+
+:root {
+  --gemtextcard_2:rgb(50, 66, 89);
+  --background: 	rgb(222, 222, 222);
+  --card: #fafafa;
+  --textcard: rgb(17, 24, 39);
+  --textcard_2: rgb(31, 41, 55);
+  --textcard_3: rgba(31, 41, 55, 0.753);
+  --webbox_colorBack: rgb(60, 89, 170) ;
+  --subox:rgb(60, 89, 170);
+  --suboxtext:white;
+  --leftcardbox:white;
+  --dayandnightmode:rgb(154, 154, 154);
+  --text_font:15px;
+  --Heading_font:18px;
+}
+
+
+body{
+  margin: 0;
+  padding: 0;
+  background-color:var(--background);
+  font-family: 'Lato', sans-serif;
+  overflow-x: hidden;
+}
+
+/* nav */
+.topbar{
+  width: 100%;
+  padding: 15px;
+  font-size: var(--Heading_font);
+  color: black;
+  font-weight: bold;
+}
+
+
+.box{
+  width: 100%;
+  height: 100%;
+}
+
+.contaner{
+  width:100vw;
+  position: relative;
+  display: flex;
+  justify-content: space-between;  
+}
+
+.contaner_left{
+  width: 40%;
+}
+
+.filter{
+  padding: 10px;
+  padding-left: 18px;
+  background-color: rgb(52, 58, 67);
+  color:white;
+
+}
+
+.card_contaner{
+  overflow: auto;max-height: 86vh;
+}
+
+.card{
+  padding: 10px;
+  background-color: white;
+
+}
+.card_layer_1{
+  display: flex;
+  justify-content: space-between;  
+}
+
+.contaner_right{
+  width: 60%;
+}
+
+.card_title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;       /* Show only 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.card:nth-child(even){
+background-color: #eeeeee;
+}

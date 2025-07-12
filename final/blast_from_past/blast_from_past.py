@@ -2,9 +2,7 @@ import threading
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
-import os
 from datetime import date
-from datetime import datetime as ds
 import pyodbc
 from datetime import datetime
 
@@ -194,7 +192,7 @@ def bidassist_funtion(past_tender_name):
     MINISTRY = past_tender_name[0]
     department = past_tender_name[1] 
     tenders = []
-    link= f"https://bidassist.com/tender-results/all-tenders/active?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2025&filter=KEYWORD:Transformer&filter=PURCHASER_NAME:Eastern%20Railway&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
+    link= f"https://bidassist.com/tender-results/all-tenders/active?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2025&filter=KEYWORD:pavement%20blocks&filter=PURCHASER_NAME:Border%20Roads%20Organisation&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
     driver.get(link)
     sleep(0.1)
     
@@ -226,7 +224,7 @@ def bidassist_funtion(past_tender_name):
 
 
 
-past_tender_name=["POLICE","ASSAM"]
+past_tender_name=["","Assam Rifles"]
     
 # bidassist_funtion(past_tender_name,iteams)
 bidassist_funtion(past_tender_name)

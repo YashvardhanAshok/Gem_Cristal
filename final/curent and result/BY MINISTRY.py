@@ -20,7 +20,6 @@ from time import sleep
 import time
 
 import requests
-import ntpath
 import pdfplumber
 
 import requests
@@ -59,15 +58,12 @@ conn.close()
 
 all_gem_ids = total_gem_ids_df['tender_id'].tolist()
 
+all_gem_ids=[]
+def convert_date_format(date_str):
+    date_obj = ds.strptime(date_str, "%d-%m-%Y")
+    return date_obj.strftime("%d-%b-%Y")
 
- 
- 
-
- 
- 
- 
-
-def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,gem_ids_copy):
+def gem_find(driver,card_elements , card, gem_ids, org_name, ministry_name,close_tender_id_list,gem_ids_copy):
     global all_gem_ids
     # scroll
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", card)
@@ -75,76 +71,33 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
     try:
         bid_title = card.find_element(By.CLASS_NAME, 'bid_no_hover')
         link_href = bid_title.get_attribute("href")
-
         start_date = card.find_element(By.CLASS_NAME, 'start_date').text
         end_date = card.find_element(By.CLASS_NAME, 'end_date').text
-
-        def convert_date_format(date_str):
-            date_obj = ds.strptime(date_str, "%d-%m-%Y")
-            return date_obj.strftime("%d-%b-%Y")
-
-        opening_date_parts = start_date.split(" ")
-        start_date = convert_date_format(opening_date_parts[0])
-
+        
         closing_date_parts = end_date.split(" ")
         end_date = convert_date_format(closing_date_parts[0])
         end_date_time = closing_date_parts[1] + " " + closing_date_parts[2]
-        
-        try:
-            quantity_element = card.find_element(By.XPATH, ".//div[contains(@class, 'col-md-4')]//div[contains(text(), 'Quantity')]")
-            quantity_text = quantity_element.text.strip()
-            if "Quantity:" in quantity_text:
-                quantity = quantity_text.split("Quantity:")[-1].strip()
-            else: quantity = 0
 
-        except:
-            quantity = 0
-
-        try:
-            department_div = card.find_element(By.CSS_SELECTOR, "div.col-md-5 > div:nth-child(2)")
-            department_address = department_div.get_attribute('innerHTML')
-            
-            if isinstance(department_address, str) and "<br>" in department_address:
-                department_address_parts = department_address.split("<br>")
-            else:
-                department_address_parts = [department_address, None]
-                
-        except:
-            department_address_parts=[None,None]
-
-        try:
-            item_element = driver.find_element(By.XPATH, "//strong[text()='Items:']/parent::div")
-            from_card_discription = item_element.text.replace("Items:", "").strip()
-        except:
-            titles = []
-            try:
-                for card_element in card_elements:
-                    text = card_element.text
-                    if text.startswith(bid_title.text):
-                        from_card_discription = titles.append(text)
-            except: pass
         if bid_title.text in gem_ids_copy:
             try: gem_ids.remove(bid_title.text)
             except: pass
-            print(f"gem id skipped:{bid_title.text} and started at: {start_date}")
+            print(f"gem id skipped: {org_name}, {bid_title.text} and started at: {start_date}")
             return {"extended": today.strftime("%d-%b-%Y"),"DATE OF SEARCH": today.strftime("%d-%b-%Y"),"TENDER ID": bid_title.text,"END DATE": end_date,"END Time": end_date_time}
+        
         elif bid_title.text in close_tender_id_list:
-            print(f"--xx gem id {bid_title.text} extended xx--")
+            print(f"--xx gem id {org_name}, {bid_title.text} extended xx--")
             return {"extended": today.strftime("%d-%b-%Y"),"DATE OF SEARCH": today.strftime("%d-%b-%Y"),"TENDER ID": bid_title.text,"END DATE": end_date,"END Time": end_date_time}
-
-        print(f"New tender:{bid_title.text} and started at: {start_date}")
-
+        
         try:
             bid_id_no = link_href.split('/')[-1]
             download_path = f'C:\\vs_code\\TenderHunter2.1.3\\download_pdf\\GeM-Bidding-{bid_id_no}.pdf'
-            
-            
+
             if os.path.exists(download_path): 
-                print(f"have file for: {bid_id_no}")
+                print(f"have file for:{org_name}, {bid_id_no}")
                 try:
                     if bid_title.text in all_gem_ids:
                         all_gem_ids.append(bid_title.text)
-                        print(f"alrady in db: {bid_title.text}")
+                        print(f"alrady in db:{org_name}, {bid_title.text}")
                         return 
                 except: pass
             
@@ -158,11 +111,43 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                         key=os.path.getctime,
                     )
                     download_path = latest_file
+                    download_path = f"C:\\vs_code\\TenderHunter2.1.3\\download_pdf\\GeM-Bidding-{bid_id_no}.pdf"
                     
                 except requests.exceptions.RequestException as e:
                     return
                 sleep(1.1)
-            
+        except: pass
+
+        opening_date_parts = start_date.split(" ")
+        start_date = convert_date_format(opening_date_parts[0])
+        
+        try:
+            quantity_element = card.find_element(By.XPATH, ".//div[contains(@class, 'col-md-4')]//div[contains(text(), 'Quantity')]")
+            quantity_text = quantity_element.text.strip()
+            if "Quantity:" in quantity_text:
+                quantity = quantity_text.split("Quantity:")[-1].strip()
+            else: quantity = 0
+
+        except:
+            quantity = 0
+
+        try:
+            item_element = driver.find_element(By.XPATH, "//strong[text()='Items:']/parent::div")
+            from_card_discription = item_element.text.replace("Items:", "").strip()
+        except:
+            titles = []
+            try:
+                for card_element in card_elements:
+                    text = card_element.text
+                    if text.startswith(bid_title.text):
+                        from_card_discription = titles.append(text)
+            except: pass
+        
+        print(f"New tender:{bid_title.text} and started at: {start_date}")
+        
+
+        try:
+
             
             
             if os.path.exists(download_path):
@@ -197,6 +182,18 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                                             
                                             try: 
                                                 if "Total Quantity" in key and value: Total_Quantity = value
+                                            except: pass
+                                            
+                                            try: 
+                                                if "Organisation Name" in key and value: Organisation = value.upper()
+                                            except: pass
+                                            
+                                            try: 
+                                                if "Department Name" in key and value: Department_Name = value.upper()
+                                            except: pass
+                                            
+                                            try: 
+                                                if "Ministry/State Name" in key and value: Ministry_Name = value.upper()
                                             except: pass
                                             
                                             try: 
@@ -260,6 +257,10 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                                                     elif "CSO" in next_line:
                                                         Beneficiary = ["signal"]
                                                         Not_Beneficiary_Found = False
+                                                        
+                                                    elif "signal" in next_line.lower():
+                                                        Beneficiary = ["signal"]
+                                                        Not_Beneficiary_Found = False
 
                                                     elif "Officer" in next_line:
                                                         Not_Beneficiary_Found = False
@@ -274,7 +275,14 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                         event_data={}
                         event_data["DATE OF SEARCH"] = today.strftime("%d-%b-%Y")
                         event_data["TENDER ID"] = bid_title.text
-                        event_data["elementPut"] = element
+                        
+                        
+                        
+                        event_data["elementPut"] = Organisation 
+                        event_data["MINISTRY"] = Ministry_Name
+                        event_data["DEPARTMENT"] = Department_Name
+                        event_data["ORGANISATION"] = Organisation
+                        
                         event_data["START DATE"] = start_date
                         event_data["END DATE"] = end_date
                         event_data["END Time"] = end_date_time
@@ -283,8 +291,6 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                         event_data["TENDER VALUE"] = Tender_value
                         event_data["Consignee Reporting"] = Consignee_Reporting_list 
                         event_data["ADDRESS"] = Address_list
-                        event_data["MINISTRY"] = department_address_parts[0]
-                        event_data["DEPARTMENT"] = element
                         event_data["BRANCH"] = Beneficiary[0]
                         event_data["MSE"] = MSE_value
                         event_data["file_path"] = download_path
@@ -300,7 +306,6 @@ def gem_find(driver,card_elements , card, gem_ids, element,close_tender_id_list,
                             else: event_data["QTY"] = quantity
                                 
                         except: pass
-                        # event_data["DEPARTMENT"] = department_address_parts[1]
                         return event_data
                 except:
                     if os.path.exists(download_path):
@@ -418,7 +423,7 @@ def sql(extracted_data):
                 emd_amount, tender_value, item_category,
                 consignee_reporting, address, MSE,
                 ministry, department, branch, link_href, file_path,
-                matches, matched_products,Cancel 
+                matches, matched_products, organisation
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
@@ -445,7 +450,9 @@ def sql(extracted_data):
                 str(tender_data.get("file_path", "")),
                 int(tender_data.get("matches", False)),
                 json.dumps(tender_data.get("matched_products", [])),
-                ""
+                
+                
+                str(tender_data.get("ORGANISATION", "")),
             )
 
             cursor.execute(insert_sql, values)
@@ -457,8 +464,10 @@ def sql(extracted_data):
 
 
 gemlog_="gem_log.txt"
+
 from selenium.webdriver.chrome.options import Options
 def gem_funtion(ministry_name, Organization_name):
+    print("hello")
     options = Options()
     prefs = {
         "download.default_directory": os.path.join(os.getcwd(), "download_pdf"),
@@ -483,7 +492,7 @@ def gem_funtion(ministry_name, Organization_name):
         query_on = '''
         SELECT * 
         FROM tender_data 
-        WHERE department = ? 
+        WHERE organisation = ? 
         AND (end_date > CAST(GETDATE() AS DATE)) 
         AND (Cancel IS NULL OR Cancel = '');
         '''
@@ -491,7 +500,7 @@ def gem_funtion(ministry_name, Organization_name):
         query_close = '''
         SELECT * 
         FROM tender_data 
-        WHERE department = ? 
+        WHERE organisation = ? 
         AND end_date < CAST(GETDATE() AS DATE);
         '''
 
@@ -545,7 +554,7 @@ def gem_funtion(ministry_name, Organization_name):
 
         live_tenders = org_name + ":\n"
         try:
-            for page_no in range(999):
+            while True:
              
                 try:
                     card_elements = WebDriverWait(driver, 30).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'card')))
@@ -557,7 +566,7 @@ def gem_funtion(ministry_name, Organization_name):
                     card_count += 1
 
                     try:
-                        json_data = gem_find(driver, card_elements, card, gem_ids, org_name,close_tender_id_list,gem_ids_copy)
+                        json_data = gem_find(driver, card_elements, card, gem_ids, org_name, ministry_name, close_tender_id_list,gem_ids_copy)
                         if json_data: extracted_data.append(json_data)
                     except: pass
                 
@@ -576,7 +585,7 @@ def gem_funtion(ministry_name, Organization_name):
             outfile.write(live_tenders + '\n')
         
         try:
-            product = [['2 V Solar Battery cells', '3D Multi Spectral Camo Vehicle Cover', '3D Printer', '3d Multi Spectral Camo Dress', 'A.C Static Meter', 'ALL Types of commercial Gym Equipment', 'AMC OF COMMERCIAL KITCHEN EQUIPMENT', 'AMC OF Gym EQUIPMENT', 'Ac static watthour meters-energy meter', 'Access Control Solutions', 'Air Freight Shipping', 'Air curtain', 'All Range Hospital Furniture', 'All Types of Commercial RO PLANTS', 'All Types of Wire and Cables',"Amc", 'Amc Of Ac', 'Amc Of Commercial Kitchen', 'Amc Of Fire Extinguishers', 'Amc Of Generators', 'Amc Of Gym Equipement', 'Amc Of Kitchen Equipement', 'Amc Of Lightning Arrestors', 'Amc Of Ro And IRP', 'Amc Of Solar Power Plant', 'Amc Of Solar Water Heaters', 'Amc Of Transformers', 'Amc of DG Sets and Transformer', 'AntI Drone system', 'Anti climb Fence', 'Automobile Batteries other batteries', 'Bain Marie', 'Bain marie', 'Barbed Wire', 'Battery', 'Body Worn Camera', 'Bola wrap Remote Restrain device', 'Braille Embosser', 'Bricks', 'Bucket Mop Wringer Trolly', 'Butter', 'CCTV', 'CEW',' Conducted Electrical Weapon', 'CGI Sheet', 'Cement','Chainlink Fence', 'Change over Switch', 'Chapati Warmer', 'Clip On Weapon Sites', 'Commercial Mixer', 'Commercial Vaccum Cleaner', 'Computer and peripherals', 'Construction Of Admin Blocks', 'Construction Of Hospital', 'Construction Of Internal Roads', 'Construction Of Klps For Defense', 'Convex Security Mirror', 'Cranes', 'Cyber Forensics Software', 'Cyber Security Solutions', 'DG SETS', 'Data Management solutions', 'Decorative Bollard', 'Decorative Street Light', 'Development Of Infrastructure For Defense', 'Development Of Sewerage Treatement Plant', 'Development Of Water Supply', 'Domestic casserole', 'Dough Kneader', 'Dough kneader 15kg', 'Dry Ration', 'Rice' , 'Pulses' , 'Sugar' , 'Coffee', 'Tea', 'Dustbin', 'Electric Fence', 'Electric Wires/Cable', 'Electric milk boiler', 'FRP', 'FRP Tank', 'Flood Light', 'Flooring', 'Forklifts', 'Fresh Fruits', 'Fresh Vegetable', 'Fuel Cell', 'Fuel cell genrators', 'GPS', 'GPS', 'Global Positioning System', 'Ghillie Suits', 'Ghilly Suit', 'Gi Pipe','Gyser', 'HHTI (Hand Held Thermal Imagers)', 'Hand Held Gas Detector', 'Hand held Thermal Imager', 'Handheld GPS', 'Hardware Item', 'Headphones', 'High Intensity Light Infrared beam', 'Honey Sucker / Sewer Cum Jetting Machine', 'Hybrid UPS', 'Idli Steamer', 'Incinerators', 'Inflatable Shelters', 'Inverters', 'JCB Bacholoader', 'Jet Spray', 'Jungle Boots', 'Kunda Gadi', 'LGSF Building', 'Large compartmental stainless steel tiffin', 'Led Bulbs', 'Less Lethal Weapons', 'Lighting Arrestor', 'Lightning Arrestor', 'Long Range Acoustic Hailing Device', 'Lorros', 'MCB', 'MCCB', 'Meat Cutting Machine', 'Mild Steel LPG Barbecues', 'Milk', 'Milk Boiler', 'Miltary Rain Poncho', 'Miniature Circuit Breaker Switches', 'Monitor', 'Multi Function Laser Aiming System', 'Nano Uav', 'New lpg cooking appliances', 'Oil', 'Online UPS', 'Outdoor Gym', 'Oven', 'PNVG', 'PPGI Sheets','Patient Bed Fowler', 'Patient Care Mattress', 'Picket Steel', 'Pickup Truck', 'Plotter', 'Plywood', 'Porta Cabin', 'Portable Kitchen', 'Portable houses', 'Poultry Product', 'Chicken', 'Egg' , 'Mutton', 'Ppgi Sheet', 'Prefab shelters with puf panel', 'Printer', 'Projector', 'Puff Cabin', 'Puff Shelter', 'Punched Tape concertina Coil PTCC', 'Reverse Osmosis', 'Remote Restraint Device', 'Rice Boiler', 'Rice boiler', 'Road Sweeping Machines', 'Robotics', 'Room Heater', 'Roti Making Machine', 'Roti Making Machine Auto matic', 'Rucksack Bags', 'SANITARY NAPKIN VENDING MACHINE', 'SS', 'SS Thermos', 'STP', 'Sewage Treatment Plants', 'Sand', 'Sanitary Items', 'Sanitary Napkins Incinetator Machine with Smoke ControlUnit', 'Satellite Tracker', 'Sea Food (Fish)', 'Search Light', 'Sedan ',' SUVS', 'Semi Automatic', 'Sewer Suction Machines', 'Shooting Range', 'Skid steer Loader', 'Software','Software Defined Radio', 'Solar Battery', 'Solar Lantern', 'Solar PV Panel','Solar Panel', 'Solar PV Plant', 'Solar Power Plant', 'Solar Street Light', 'Solar Street Light all Type', 'Solar Tublar Batteries', 'Solar Water Heater', 'Solar inverter', 'Solar water Heater', 'Solar water pump', 'Speakers', 'Street Light', 'Switch fuse unit', 'Tablet', 'Tandoor', 'Tandoor, Height 481-500 Millimeter', 'Tubes', 'UAV', 'Under Water Torch', 'Unmanned Aerial Vehicle', 'Vaccum Cleaner', 'Vegetable Cutter', 'Video Survelliance ',' Analytics Solutions', 'WTP', 'Walkie Talkie', 'Waste Management', 'Waste Management Plants', 'Water Bowser', 'Water Cooling', 'Water Dispenser', 'Water Tanker', 'Weapon Sight', 'Weapon Sites', 'Weapon Support system', 'Wet Grinder', 'Wheel Barrow', 'X-ray Machine', 'XLPE Cables', 'water cooler']]
+            product = [['2 v solar battery cells', '3d multi spectral camo vehicle cover', '3d printer', '3d multi spectral camo dress', 'a.c static meter', 'gym', 'kitchen', 'kitchen', 'amc', 'gym', 'ac static watthour meters-energy meter', 'access control solutions', 'air freight shipping', 'air curtain', 'all range hospital furniture', 'all types of commercial ro plants', 'all types of wire and cables', 'amc', 'amc of ac', 'amc of commercial kitchen', 'amc of fire extinguishers', 'amc of generators', 'amc of gym equipement', 'amc of kitchen equipement', 'amc of lightning arrestors', 'amc of ro and irp', 'amc of solar power plant', 'amc of solar water heaters', 'amc of transformers', 'amc of dg sets and transformer', 'anti drone system', 'anti climb fence', 'automobile batteries other batteries', 'bain marie', 'bain marie', 'barbed wire', 'battery', 'body worn camera', 'bola wrap remote restrain device', 'braille embosser', 'bricks', 'bucket mop wringer trolly', 'butter', 'cctv', 'cew', ' conducted electrical weapon', 'cgi sheet', 'cement', 'chainlink fence', 'change over switch', 'chapati warmer', 'clip on weapon sites', 'commercial mixer', 'commercial vaccum cleaner', 'computer and peripherals', 'construction of admin blocks', 'construction of hospital', 'construction of internal roads', 'construction of klps for defense', 'convex security mirror', 'cranes', 'cyber forensics software', 'cyber security solutions', 'dg sets', 'data management solutions', 'decorative bollard', 'decorative street light', 'development of infrastructure for defense', 'development of sewerage treatement plant', 'development of water supply', 'domestic casserole', 'dough kneader', 'dough kneader 15kg', 'dry ration', 'rice', 'pulses', 'sugar', 'coffee', 'tea', 'dustbin', 'electric fence', 'electric wires/cable', 'electric milk boiler', 'frp', 'frp tank', 'flood light', 'flooring', 'forklifts', 'fresh fruits', 'fresh vegetable', 'fuel cell', 'fuel cell genrators', 'gps', 'gps', 'global positioning system', 'ghillie suits', 'ghilly suit', 'gi pipe', 'gyser', 'hhti (hand held thermal imagers)', 'hand held gas detector', 'hand held thermal imager', 'handheld gps', 'hardware item', 'headphones', 'high intensity light infrared beam', 'honey sucker / sewer cum jetting machine', 'hybrid ups', 'idli steamer', 'incinerators', 'inflatable shelters', 'inverters', 'jcb bacholoader', 'jet spray', 'jungle boots', 'kunda gadi', 'lgsf building', 'large compartmental stainless steel tiffin', 'led bulbs', 'less lethal weapons', 'lighting arrestor', 'lightning arrestor', 'long range acoustic hailing device', 'lorros', 'mcb', 'mccb', 'meat cutting machine', 'mild steel lpg barbecues', 'milk', 'milk boiler', 'miltary rain poncho', 'miniature circuit breaker switches', 'monitor', 'multi function laser aiming system', 'nano uav', 'new lpg cooking appliances', 'oil', 'online ups', 'outdoor gym', 'oven', 'pnvg', 'ppgi sheets', 'patient bed fowler', 'patient care mattress', 'picket steel', 'pickup truck', 'plotter', 'plywood', 'porta cabin', 'portable kitchen', 'portable houses', 'poultry product', 'chicken', 'egg', 'mutton', 'ppgi sheet', 'prefab shelters with puf panel', 'printer', 'projector', 'puff cabin', 'puff shelter', 'punched tape concertina coil ptcc', 'reverse osmosis', 'remote restraint device', 'rice boiler', 'rice boiler', 'road sweeping machines', 'robotics', 'room heater', 'roti making machine', 'roti making machine auto matic', 'rucksack bags', 'sanitary napkin vending machine', 'ss', 'ss thermos', 'stp', 'sewage treatment plants', 'sand', 'sanitary items', 'sanitary napkins incinetator machine with smoke controlunit', 'satellite tracker', 'sea food (fish)', 'search light', 'sedan ', ' suvs', 'semi automatic', 'sewer suction machines', 'shooting range', 'skid steer loader', 'software', 'software defined radio', 'solar battery', 'solar lantern', 'solar pv panel', 'solar panel', 'solar pv plant', 'solar power plant', 'solar street light', 'solar street light all type', 'solar tublar batteries', 'solar water heater', 'solar inverter', 'solar water heater', 'solar water pump', 'speakers', 'street light', 'switch fuse unit', 'tablet', 'tandoor', 'tandoor, height 481-500 millimeter', 'tubes', 'uav', 'under water torch', 'unmanned aerial vehicle', 'vaccum cleaner', 'vegetable cutter', 'video survelliance ', ' analytics solutions', 'wtp', 'walkie talkie', 'waste management', 'waste management plants', 'water bowser', 'water cooling', 'water dispenser', 'water tanker', 'weapon sight', 'weapon sites', 'weapon support system', 'wet grinder', 'wheel barrow', 'x-ray machine', 'xlpe cables', 'water cooler']]
             flat_products = [item.lower() for sublist in product for item in sublist]
 
             for item in extracted_data:
@@ -596,6 +605,10 @@ def gem():
     try:
         max_threads = 4
         threads = []
+        
+        
+
+        
 
         MINISTRY_list = [
             ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
@@ -612,8 +625,10 @@ def gem():
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
 
+        # MINISTRY_list =["MINISTRY OF HOME AFFAIRS", ["NATIONAL DISASTER RESPONSE FORCE"]],
+
         # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
-        MINISTRY_list =  [["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]]]
+        # MINISTRY_list =  [["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]]]
 
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]
@@ -632,3 +647,5 @@ def gem():
         traceback.print_exc() 
 
 gem()
+
+# ongc full form and Ntpc

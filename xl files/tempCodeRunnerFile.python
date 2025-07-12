@@ -1,0 +1,33 @@
+import pyodbc
+import pandas as pd
+
+# List of tender IDs you're interested in
+tender_ids = ['GEM/2023/B/4339460']
+
+# Convert list into SQL-compatible string
+formatted_ids = ",".join(f"'{tid}'" for tid in tender_ids)
+
+# SQL Query
+query = f'''
+    SELECT tender_id, file_path
+    FROM tender_data 
+    WHERE 
+        tender_id IN ({formatted_ids})
+'''
+
+# Connect to the database
+conn = pyodbc.connect(
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=localhost\\SQLEXPRESS;"
+    "DATABASE=gem_tenders;"
+    "Trusted_Connection=yes;"
+)
+
+# Run the query
+df = pd.read_sql(query, conn)
+
+# Convert result to list of lists
+result = df.values.tolist()
+
+# Print result
+print(result)
