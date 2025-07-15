@@ -1,9 +1,9 @@
-[27924:23088:0712/183243.076:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
-[24912:7656:0712/183243.225:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[27076:2424:0712/183243.225:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[19264:30532:0712/183243.233:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
-[19264:30532:0712/183243.235:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
-[14176:4312:0712/183244.093:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[27924:3080:0712/183247.891:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[29868:26292:0712/183306.367:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
-[29868:26292:0712/183306.367:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
+[31236:31264:0715/115518.116:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
+[32328:26808:0715/115518.266:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
+[32328:26808:0715/115518.268:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
+[30188:17376:0715/115518.280:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[19720:28212:0715/115518.287:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[32040:21772:0715/115518.933:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[28276:21724:0715/115519.132:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[31236:23896:0715/115523.170:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[31236:23896:0715/115547.263:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT

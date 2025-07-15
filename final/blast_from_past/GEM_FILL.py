@@ -543,12 +543,16 @@ def split_into_parts(lst, n):
     return [lst[i*k + min(i, m):(i+1)*k + min(i+1, m)] for i in range(n)]
 
 raw_text = """  
-GEM/2023/B/4417138
-GEM/2024/B/4443666
-GEM/2024/B/4449405
-GEM/2023/B/3207994
+GEM/2023/B/3198840
+GEM/2022/B/2907260
+GEM/2024/B/5448535
+GEM/2024/B/5235792
+GEM/2025/B/5978513
+GEM/2025/B/6040299
+
 
 """
+# GEM/2025/B/76901
 
 tender_ids = raw_text.strip().split('\n')
 tender_ids = set(tender_ids)

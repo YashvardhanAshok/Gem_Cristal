@@ -1,3 +1,4 @@
+import PyPDF2
 import os
 import time
 from selenium import webdriver
@@ -26,6 +27,25 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.worksheet.page import PageMargins
 from openpyxl.utils import get_column_letter
 from time import sleep, time 
+import tkinter as tk
+from tkinter import ttk
+
+
+def wait_for_user():
+    def on_click():
+        root.destroy()  
+
+    root = tk.Tk()
+    root.title("Resume Script")
+    root.geometry("200x80")
+
+    style = ttk.Style()
+    style.configure("TButton", font=("Segoe UI", 10))
+
+    ttk.Label(root, text="Click to continue").pack(pady=5)
+    ttk.Button(root, text="Proceed", command=on_click).pack()
+    root.mainloop()  
+
 
 
 
@@ -84,7 +104,7 @@ def sql_to_json_exclude_columns():
     )
 
     global gem_id_find
-    query = f"SELECT * FROM tender_data WHERE tender_id in {gem_id_find}"
+    query = f"SELECT * FROM tender_data WHERE tender_id in ({gem_id_find})"
 
     df = pd.read_sql(query, conn)
     conn.close()
@@ -104,8 +124,6 @@ def sql_to_json_exclude_columns():
 
     json_data = df.to_json(orient='records', indent=4)
     return json_data
-
-
 
 def click_download_and_get_file(driver, download_dir, timeout=120):
     try:
@@ -136,11 +154,6 @@ import os
 from PyPDF2 import PdfReader, PdfWriter
 from PyPDF2._page import PageObject
 from win32com.client import Dispatch
-
-
-
-
-import os
 from time import sleep
 from PyPDF2 import PdfReader, PdfWriter, PageObject
 from win32com.client import Dispatch
@@ -151,8 +164,6 @@ def pdf_maker(excel_file, your_pdf, merged_pdf):
         pythoncom.CoInitialize()
         print("Starting Excel application...")
         excel = Dispatch('Excel.Application')
-        # Removed setting excel.Visible to avoid the error:
-        # excel.Visible = False
 
         print(f"Opening Excel file: {excel_file}")
         wb = excel.Workbooks.Open(excel_file)
@@ -171,7 +182,27 @@ def pdf_maker(excel_file, your_pdf, merged_pdf):
         excel.Quit()
         pythoncom.CoUninitialize()
 
-        sleep(2)  # small delay to ensure file write is complete
+        sleep(2)
+
+        # Open the input PDF
+        with open(excel_file_pdf_file, "rb") as file:
+            reader = PyPDF2.PdfReader(file)
+            writer = PyPDF2.PdfWriter()
+
+            num_pages = len(reader.pages)
+
+            for i in range(num_pages):
+                page = reader.pages[i]
+
+                # Flip every 2nd page (i.e., page index 1, 3, 5,...)
+                if (i + 1) % 2 == 0:
+                    page.rotate(180)
+
+                writer.add_page(page)
+
+            # Save the output
+            with open(excel_file_pdf_file, "wb") as out_file:
+                writer.write(out_file)
 
         # Merge PDFs
         print(f"Merging PDFs: {your_pdf} + {excel_file_pdf_file}")
@@ -223,18 +254,39 @@ def pdf_maker(excel_file, your_pdf, merged_pdf):
             pass
         pythoncom.CoUninitialize()
 
-    
+from urllib.parse import urlparse
 def exl(existing_data,csv_path):
     tender_file = existing_data[0]
     your_pdf = tender_file["file_path"]
+
+    def extract_bid_number(url):
+        parsed = urlparse(url)
+        if parsed.netloc == "bidplus.gem.gov.in":
+            match = re.search(r'(\d+)(?!.*\d)', parsed.path)
+            if match:
+                return match.group(1)
+        return None
+
+    bid_number = extract_bid_number(your_pdf)
+    if bid_number:
+        your_pdf = f'C:\\vs_code\\TenderHunter2.1.3\\download_pdf\\GeM-Bidding-{bid_number}.pdf'
+    
     tender_id = tender_file["tender_id"].replace("/", "_")
     df_json = pd.DataFrame(existing_data)
 
+    # duplication
+    # df_csv = pd.read_csv(csv_path)
+    # # df_csv = df_csv.drop_duplicates(subset=['ref_no'], keep='first')
+    # df_csv = df_csv.drop(columns=['region', 'tender_id', 'url'], errors='ignore')
+    # df_csv = df_csv[df_csv['result_bid_value'].notna()]
+    # df_csv = df_csv[df_csv['result_bid_value'].astype(str).str.strip() != ""]
+
     df_csv = pd.read_csv(csv_path)
-    df_csv = df_csv.drop_duplicates(subset=['ref_no'], keep='first')
     df_csv = df_csv.drop(columns=['region', 'tender_id', 'url'], errors='ignore')
-    df_csv = df_csv[df_csv['result_bid_value'].notna()]
+    df_csv = df_csv[df_csv['bid_rank'].astype(str).str.strip().isin(["L1"])]
     df_csv = df_csv[df_csv['result_bid_value'].astype(str).str.strip() != ""]
+
+
 
     for col in df_csv.select_dtypes(include=['object']).columns:
         df_csv[col] = df_csv[col].str.replace('[', '', regex=False).str.replace(']', '', regex=False)
@@ -275,15 +327,13 @@ def exl(existing_data,csv_path):
         cols.insert(idx + 1, 'RE-Val Word')
         df = df[cols]
 
-    # --- Write DataFrame to Excel ---
     output_file = r"C:\vs_code\TenderHunter2.1.3\final\Exported_Tender_Data.xlsx"
-    sheet_name = "All Tenders"
+    sheet_name = ognisation
     with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
         df.index = df.index + 1
         df = df.sort_index()
         df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=1)
 
-    # --- Load workbook and worksheet for formatting ---
     wb = load_workbook(output_file)
     ws = wb[sheet_name]
 
@@ -292,7 +342,6 @@ def exl(existing_data,csv_path):
     alignment = Alignment(wrap_text=True, horizontal='center', vertical='center')
     current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    # --- DELETE columns "Qty" and "File Path" from worksheet ---
     cols_to_delete = []
     for col_idx, col_cell in enumerate(ws[2], 1):  # header row 2
         if col_cell.value in ['Qty', 'File Path']:
@@ -342,14 +391,11 @@ def exl(existing_data,csv_path):
         else:
             ws.column_dimensions[col_letter].width = 18
 
-    # --- Save the formatted workbook ---
     wb.save(output_file)
     os.remove(csv_path)
-    # print(f"✅ Excel saved to: {output_file}")
 
     unique_id = uuid.uuid4()
     print(unique_id)
-    global ognisation
     merged_pdf = f"C:\\vs_code\\TenderHunter2.1.3\\final\\curent and result\\output_pdf\\{tender_id}_{ognisation}.pdf" 
     print("\n","\n","\n","\n","\n","\n","\n","\n","\n",output_file,"\n",your_pdf,"\n",merged_pdf)
     pdf_maker(output_file,your_pdf,merged_pdf)
@@ -370,9 +416,17 @@ def main():
     print(tenders)
     for tender in tenders: 
         try:
-            search_input = driver.find_element(By.ID, "rc_select_3")
-            search_input.clear()
+            search_input = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "rc_select_3"))
+            )
+
+            search_input.click()
+            search_input.send_keys(Keys.CONTROL, 'a')
+            search_input.send_keys(Keys.BACKSPACE)
+            sleep(0.2)
+
             input_str = clean_string(str(tender.get("item_description", "")))
+            print("\n", input_str)
             search_input.send_keys(input_str)
             sleep(1)
 
@@ -380,13 +434,18 @@ def main():
             search_btn.click()
             sleep(3)
 
+
             no_result_elements = driver.find_elements(By.XPATH, "//h5[contains(@class, 'fw-bold') and contains(text(), 'No Results Found')]")
             if no_result_elements:
-                continue
+                wait_for_user()
+                # continue
+
+            wait_for_user()
 
             downloaded_file = click_download_and_get_file(driver, download_dir)
             if downloaded_file:
                 tender_arra=[]
+                
                 tender_arra.append(tender)
                 exl(tender_arra,str(downloaded_file))
 
@@ -395,68 +454,19 @@ def main():
 
 
 
-ognisation = "BRO"
-gem_id_find = ('GEM/2025/B/6300895','GEM/2025/B/6300895')
+ognisation = "NDRF"
+
+# gem_id_find = ["GEM/2025/B/6376901","GEM/2025/B/6334937","GEM/2025/B/5833446","GEM/2025/B/6330162","GEM/2025/B/6209828","GEM/2025/B/513250"]
+# gem_id_find = ["GEM/2025/B/6266864","GEM/2025/B/6073116"]
+# gem_id_find = ["GEM/2025/B/6209828"]
+# gem_id_find = ["GEM/2025/B/6423449","GEM/2025/B/6434712","GEM/2025/B/6267035","GEM/2025/B/6301369","GEM/2025/B/6259584",]
+gem_id_find = ["GEM/2025/B/6349513"]
+
+
+
+
+gem_id_find = ",".join(f"'{tid}'" for tid in gem_id_find)
 main()
-
-
-
-# GEM/2025/B/6393760
-# GEM/2025/B/6300895
-# GEM/2025/B/6362841
-# GEM/2025/B/6379675
-# GEM/2025/B/6387385
-# GEM/2025/B/6399067
-# GEM/2025/B/6388104
-# GEM/2025/B/6349968
-# GEM/2025/B/6340824
-# GEM/2025/B/6249814
-# GEM/2025/B/6409239
-# GEM/2025/B/6409726
-# GEM/2025/B/6397229
-# GEM/2025/B/6379052
-# GEM/2025/B/6388415
-# GEM/2025/B/6393370
-# GEM/2025/B/6393308
-# GEM/2025/B/6391020
-# GEM/2025/B/6390105
-# GEM/2025/B/6392665
-# GEM/2025/B/6388593
-# GEM/2025/B/6423899
-# GEM/2025/B/6398808
-# GEM/2025/B/6371965
-# GEM/2025/B/6425914
-# GEM/2025/B/6426031
-# GEM/2025/B/6414088
-# GEM/2025/B/6428107
-# GEM/2025/B/6389606
-# GEM/2025/B/6360167
-# GEM/2025/B/6349513
-# GEM/2025/B/6428096
-# GEM/2025/B/6388236
-# GEM/2025/B/6362310
-# GEM/2025/B/6382172
-# GEM/2025/B/6431448
-# GEM/2025/B/6433155
-# GEM/2025/B/6412114
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

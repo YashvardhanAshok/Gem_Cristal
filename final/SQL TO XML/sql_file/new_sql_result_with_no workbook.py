@@ -10,7 +10,7 @@ conn = pyodbc.connect(
     "Trusted_Connection=yes;"
 )
 
-query = "SELECT * FROM tender_data where tender_id in('GEM/2023/B/4417138','GEM/2023/B/3207994','GEM/2024/B/4443666','GEM/2024/B/4449405')"
+query = "SELECT * FROM tender_data where tender_id in('GEM/2023/B/3198840','GEM/2022/B/2907260','GEM/2024/B/5448535','GEM/2024/B/5235792','GEM/2025/B/5978513','GEM/2025/B/6040299')"
 # query = '''SELECT * FROM tender_data WHERE branch = 'signal'
 
 #         '''

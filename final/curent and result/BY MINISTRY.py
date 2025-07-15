@@ -605,11 +605,6 @@ def gem():
     try:
         max_threads = 4
         threads = []
-        
-        
-
-        
-
         MINISTRY_list = [
             ["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],
             ["MINISTRY OF COMMUNICATIONS", ['']],
@@ -625,7 +620,7 @@ def gem():
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
 
-        MINISTRY_list =["MINISTRY OF HOME AFFAIRS", ["BORDER SECURITY FORCE"]],
+        # MINISTRY_list =["MINISTRY OF HOME AFFAIRS", ["CENTRAL RESERVE POLICE FORCE"]],
 
         # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
         # MINISTRY_list =  [["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]]]
