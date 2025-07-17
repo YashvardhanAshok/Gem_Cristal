@@ -525,13 +525,10 @@ def gem_funtion(ministry_name, Organization_name):
         
         ministry_search__field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'select2-search__field')))
         ministry_search__field.clear()
-        
         ministry_search__field.send_keys(ministry_name)
         ministry_search__field.send_keys(Keys.RETURN)
-
         json_dir = os.path.join(os.getcwd(), 'db', 'json')
         os.makedirs(json_dir, exist_ok=True)
-
         sleep(2)
 
 
@@ -578,14 +575,11 @@ def gem_funtion(ministry_name, Organization_name):
         except:
             print(f"main loop brok for {ministry_name}: {org_name}") 
         
-        
-
-        
         with open('gemlog_.txt', 'a', encoding='utf-8') as outfile:
             outfile.write(live_tenders + '\n')
         
         try:
-            product = [['2 v solar battery cells', '3d multi spectral camo vehicle cover', '3d printer', '3d multi spectral camo dress', 'a.c static meter', 'gym', 'kitchen', 'kitchen', 'amc', 'gym', 'ac static watthour meters-energy meter', 'access control solutions', 'air freight shipping', 'air curtain', 'all range hospital furniture', 'all types of commercial ro plants', 'all types of wire and cables', 'amc', 'amc of ac', 'amc of commercial kitchen', 'amc of fire extinguishers', 'amc of generators', 'amc of gym equipement', 'amc of kitchen equipement', 'amc of lightning arrestors', 'amc of ro and irp', 'amc of solar power plant', 'amc of solar water heaters', 'amc of transformers', 'amc of dg sets and transformer', 'anti drone system', 'anti climb fence', 'automobile batteries other batteries', 'bain marie', 'bain marie', 'barbed wire', 'battery', 'body worn camera', 'bola wrap remote restrain device', 'braille embosser', 'bricks', 'bucket mop wringer trolly', 'butter', 'cctv', 'cew', ' conducted electrical weapon', 'cgi sheet', 'cement', 'chainlink fence', 'change over switch', 'chapati warmer', 'clip on weapon sites', 'commercial mixer', 'commercial vaccum cleaner', 'computer and peripherals', 'construction of admin blocks', 'construction of hospital', 'construction of internal roads', 'construction of klps for defense', 'convex security mirror', 'cranes', 'cyber forensics software', 'cyber security solutions', 'dg sets', 'data management solutions', 'decorative bollard', 'decorative street light', 'development of infrastructure for defense', 'development of sewerage treatement plant', 'development of water supply', 'domestic casserole', 'dough kneader', 'dough kneader 15kg', 'dry ration', 'rice', 'pulses', 'sugar', 'coffee', 'tea', 'dustbin', 'electric fence', 'electric wires/cable', 'electric milk boiler', 'frp', 'frp tank', 'flood light', 'flooring', 'forklifts', 'fresh fruits', 'fresh vegetable', 'fuel cell', 'fuel cell genrators', 'gps', 'gps', 'global positioning system', 'ghillie suits', 'ghilly suit', 'gi pipe', 'gyser', 'hhti (hand held thermal imagers)', 'hand held gas detector', 'hand held thermal imager', 'handheld gps', 'hardware item', 'headphones', 'high intensity light infrared beam', 'honey sucker / sewer cum jetting machine', 'hybrid ups', 'idli steamer', 'incinerators', 'inflatable shelters', 'inverters', 'jcb bacholoader', 'jet spray', 'jungle boots', 'kunda gadi', 'lgsf building', 'large compartmental stainless steel tiffin', 'led bulbs', 'less lethal weapons', 'lighting arrestor', 'lightning arrestor', 'long range acoustic hailing device', 'lorros', 'mcb', 'mccb', 'meat cutting machine', 'mild steel lpg barbecues', 'milk', 'milk boiler', 'miltary rain poncho', 'miniature circuit breaker switches', 'monitor', 'multi function laser aiming system', 'nano uav', 'new lpg cooking appliances', 'oil', 'online ups', 'outdoor gym', 'oven', 'pnvg', 'ppgi sheets', 'patient bed fowler', 'patient care mattress', 'picket steel', 'pickup truck', 'plotter', 'plywood', 'porta cabin', 'portable kitchen', 'portable houses', 'poultry product', 'chicken', 'egg', 'mutton', 'ppgi sheet', 'prefab shelters with puf panel', 'printer', 'projector', 'puff cabin', 'puff shelter', 'punched tape concertina coil ptcc', 'reverse osmosis', 'remote restraint device', 'rice boiler', 'rice boiler', 'road sweeping machines', 'robotics', 'room heater', 'roti making machine', 'roti making machine auto matic', 'rucksack bags', 'sanitary napkin vending machine', 'ss', 'ss thermos', 'stp', 'sewage treatment plants', 'sand', 'sanitary items', 'sanitary napkins incinetator machine with smoke controlunit', 'satellite tracker', 'sea food (fish)', 'search light', 'sedan ', ' suvs', 'semi automatic', 'sewer suction machines', 'shooting range', 'skid steer loader', 'software', 'software defined radio', 'solar battery', 'solar lantern', 'solar pv panel', 'solar panel', 'solar pv plant', 'solar power plant', 'solar street light', 'solar street light all type', 'solar tublar batteries', 'solar water heater', 'solar inverter', 'solar water heater', 'solar water pump', 'speakers', 'street light', 'switch fuse unit', 'tablet', 'tandoor', 'tandoor, height 481-500 millimeter', 'tubes', 'uav', 'under water torch', 'unmanned aerial vehicle', 'vaccum cleaner', 'vegetable cutter', 'video survelliance ', ' analytics solutions', 'wtp', 'walkie talkie', 'waste management', 'waste management plants', 'water bowser', 'water cooling', 'water dispenser', 'water tanker', 'weapon sight', 'weapon sites', 'weapon support system', 'wet grinder', 'wheel barrow', 'x-ray machine', 'xlpe cables', 'water cooler']]
+            product = [['solar battery cells', 'multi spectral camo vehicle cover', 'printer', 'multi spectral camo dress',"a.c", 'static meter', 'gym', 'kitchen',"bed","hospital", 'amc', 'ac static watthour meters-energy meter', 'access control solutions', 'air freight shipping', 'air curtain', 'all range hospital furniture', 'all types of commercial ro plants', 'all types of wire and cables', 'amc', 'amc of ac', 'amc of commercial kitchen', 'amc of fire extinguishers',"fire extinguishers", 'amc of generators',"generators", 'amc of gym equipement',"gym equipement", 'amc of kitchen equipement', 'amc of lightning arrestors',"lightning", 'amc of ro and irp', 'amc of solar power plant',"solar power plant", 'amc of solar water heaters',"solar water", 'amc of transformers',"transformers", 'amc of dg sets and transformer', 'anti drone system',"drone system","drone", 'anti climb fence',"climb fence","fence", 'automobile batteries other batteries', 'bain marie', 'bain marie', 'barbed wire', 'battery', 'body worn camera', 'bola wrap remote restrain device', 'braille embosser', 'bricks', 'bucket mop wringer trolly', 'butter', 'cctv', 'cew', ' conducted electrical weapon', 'cgi sheet', 'cement', 'chainlink fence', 'change over switch', 'chapati warmer', 'clip on weapon sites', 'commercial mixer', 'commercial vaccum cleaner', 'computer and peripherals', 'construction of admin blocks', 'construction of hospital', 'construction of internal roads', 'construction of klps for defense', 'convex security mirror', 'cranes', 'cyber forensics software', 'cyber security solutions', 'dg sets', 'data management solutions', 'decorative bollard', 'decorative street light', 'development of infrastructure for defense', 'development of sewerage treatement plant', 'development of water supply', 'domestic casserole', 'dough kneader', 'dough kneader 15kg', 'dry ration', 'rice', 'pulses', 'sugar', 'coffee', 'tea', 'dustbin', 'electric fence', 'electric wires/cable', 'electric milk boiler', 'frp', 'frp tank', 'flood light', 'flooring', 'forklifts', 'fresh fruits', 'fresh vegetable', 'fuel cell', 'fuel cell genrators', 'gps', 'gps', 'global positioning system', 'ghillie suits', 'ghilly suit', 'gi pipe', 'gyser', 'hhti (hand held thermal imagers)', 'hand held gas detector',"gas detector", 'hand held thermal imager', 'handheld gps', 'hardware item', 'headphones', 'high intensity light infrared beam', 'honey sucker / sewer cum jetting machine', 'hybrid ups', 'idli steamer', 'incinerators', 'inflatable shelters', 'inverters', 'jcb bacholoader', 'jet spray', 'jungle boots', 'kunda gadi', 'lgsf building', 'large compartmental stainless steel tiffin', 'led bulbs', 'less lethal weapons', 'lighting arrestor', 'lightning arrestor', 'long range acoustic hailing device', 'lorros', 'mcb', 'mccb', 'meat cutting machine', 'mild steel lpg barbecues', 'milk', 'milk boiler', 'miltary rain poncho', 'miniature circuit breaker switches', 'monitor', 'multi function laser aiming system', 'nano uav', 'new lpg cooking appliances', 'oil', 'online ups', 'outdoor gym', 'oven', 'pnvg', 'ppgi sheets', 'patient bed fowler', 'patient care mattress', 'picket steel', 'pickup truck', 'plotter', 'plywood', 'porta cabin', 'portable kitchen', 'portable houses', 'poultry product', 'chicken', 'egg', 'mutton', 'ppgi sheet', 'prefab shelters with puf panel', 'printer', 'projector', 'puff cabin', 'puff shelter', 'punched tape concertina coil ptcc', 'reverse osmosis', 'remote restraint device', 'rice boiler', 'rice boiler', 'road sweeping machines', 'robotics', 'room heater', 'roti making machine', 'roti making machine auto matic', 'rucksack bags', 'sanitary napkin vending machine', 'ss', 'ss thermos', 'stp', 'sewage treatment plants', 'sand', 'sanitary items', 'sanitary napkins incinetator machine with smoke controlunit', 'satellite tracker', 'sea food (fish)', 'search light', 'sedan ', ' suvs', 'semi automatic', 'sewer suction machines', 'shooting range', 'skid steer loader', 'software', 'software defined radio', 'solar battery', 'solar lantern', 'solar pv panel', 'solar panel', 'solar pv plant', 'solar power plant', 'solar street light', 'solar street light all type', 'solar tublar batteries', 'solar water heater', 'solar inverter', 'solar water heater', 'solar water pump', 'speakers', 'street light', 'switch fuse unit', 'tablet', 'tandoor', 'tandoor, height 481-500 millimeter', 'tubes', 'uav', 'under water torch', 'unmanned aerial vehicle', 'vaccum cleaner', 'vegetable cutter', 'video survelliance ', ' analytics solutions', 'wtp', 'walkie talkie', 'waste management', 'waste management plants', 'water bowser', 'water cooling', 'water dispenser', 'water tanker', 'weapon sight', 'weapon sites', 'weapon support system', 'wet grinder', 'wheel barrow', 'x-ray machine', 'xlpe cables', 'water cooler']]
             flat_products = [item.lower() for sublist in product for item in sublist]
 
             for item in extracted_data:
@@ -620,7 +614,7 @@ def gem():
             ["MINISTRY OF DEFENCE", ["BORDER ROAD ORGANISATION"]]
             ]
 
-        # MINISTRY_list =["MINISTRY OF HOME AFFAIRS", ["CENTRAL RESERVE POLICE FORCE"]],
+        # MINISTRY_list =["MINISTRY OF HOME AFFAIRS", ["BORDER SECURITY FORCE"]],
 
         # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["ASSAM RIFLES"]]]
         # MINISTRY_list =  [["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]]]
@@ -644,3 +638,22 @@ def gem():
 gem()
 
 # ongc full form and Ntpc
+
+
+
+
+
+
+# options = Options()
+# prefs = {
+#     "download.default_directory": os.path.join(os.getcwd(), "download_pdf"),
+#     "download.prompt_for_download": False,
+#     "plugins.always_open_pdf_externally": True
+# }
+# options.add_experimental_option("prefs", prefs)
+# driver = webdriver.Edge(options=options)
+
+
+# gem_ids = ["GEM/2025/B/6298154","GEM/2025/B/6298107","GEM/2025/B/6302078","GEM/2025/B/6401771","GEM/2025/B/6398520","GEM/2025/B/6396858","GEM/2025/B/6298151","GEM/2025/B/6396268","GEM/2025/B/6424743","GEM/2025/B/6184791","GEM/2025/B/6354352","GEM/2025/B/6380332","GEM/2025/B/6396641","GEM/2025/B/6298096","GEM/2025/B/6403700","GEM/2025/B/6272783","GEM/2025/B/6451670","GEM/2025/B/6389554","GEM/2025/B/6351326","GEM/2025/B/6272246","GEM/2025/B/6319539","GEM/2025/B/6414083"]
+# cancelled_fun(driver,gem_ids)
+

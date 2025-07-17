@@ -1,0 +1,3 @@
+[]
+[]
+[{'DATE OF SEARCH': '16-Jul-2025', 'MINISTRY': '', 'DEPARTMENT': 'Assam Rifles', 'TENDER ID': 'GEM/2022/B/2306231', 'link': 'https://bidassist.com/tender-results/delhi-tenders/border-security-force/detail-77ab02ac-9b45-485b-804b-e2f6b70fedd7', 'ADDRESS': ['New Delhi, Delhi'], 'description': 'CATEGORY: <mark>TASER</mark> GUN X-2 (Q3)', 'END DATE': '2022-08-15', 'tender_amount': '', 'emd_amount': '', 'ITEM CATEGORY': 'CATEGORY: <mark>TASER</mark> GUN X-2 (Q3)', 'gem': 'Goods'}]

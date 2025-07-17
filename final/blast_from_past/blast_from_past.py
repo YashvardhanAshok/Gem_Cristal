@@ -192,7 +192,8 @@ def bidassist_funtion(past_tender_name):
     MINISTRY = past_tender_name[0]
     department = past_tender_name[1] 
     tenders = []
-    link= f"https://bidassist.com/tender-results/all-tenders/active?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2025&filter=KEYWORD:Butyl%20Rubber%20Gloves&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
+    
+    link= f"https://bidassist.com/tender-results/all-tenders/active?sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ARCHIVED&tenderEntity=BID_AWARD&year=2022&filter=KEYWORD:TASER&filter=PURCHASER_NAME:Border%20Security%20Force&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false&"
     driver.get(link)
     sleep(0.1)
     

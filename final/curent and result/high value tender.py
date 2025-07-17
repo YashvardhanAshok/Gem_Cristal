@@ -274,19 +274,11 @@ def exl(existing_data,csv_path):
     tender_id = tender_file["tender_id"].replace("/", "_")
     df_json = pd.DataFrame(existing_data)
 
-    # duplication
-    # df_csv = pd.read_csv(csv_path)
-    # # df_csv = df_csv.drop_duplicates(subset=['ref_no'], keep='first')
-    # df_csv = df_csv.drop(columns=['region', 'tender_id', 'url'], errors='ignore')
-    # df_csv = df_csv[df_csv['result_bid_value'].notna()]
-    # df_csv = df_csv[df_csv['result_bid_value'].astype(str).str.strip() != ""]
-
     df_csv = pd.read_csv(csv_path)
     df_csv = df_csv.drop(columns=['region', 'tender_id', 'url'], errors='ignore')
     df_csv = df_csv[df_csv['bid_rank'].astype(str).str.strip().isin(["L1"])]
     df_csv = df_csv[df_csv['result_bid_value'].astype(str).str.strip() != ""]
-
-
+    df_csv = df_csv[~df_csv['organisation'].astype(str).str.lower().str.contains("ministry")]
 
     for col in df_csv.select_dtypes(include=['object']).columns:
         df_csv[col] = df_csv[col].str.replace('[', '', regex=False).str.replace(']', '', regex=False)
@@ -308,7 +300,7 @@ def exl(existing_data,csv_path):
             if val >= 1_00_00_000:
                 return f"{val / 1_00_00_000:.1f} Cr"
             elif val >= 1_00_000:
-                return f"{val / 1_00_000:.1f} LPA"
+                return f"{val / 1_00_000:.1f} L"
             elif val > 0:
                 return f"{val:.0f}"
             else:
@@ -387,6 +379,8 @@ def exl(existing_data,csv_path):
         elif title == 'Item Description':
             ws.column_dimensions[col_letter].width = 35
         elif title == 'Address':
+            ws.column_dimensions[col_letter].width = 20
+        elif title == 'Company Name':
             ws.column_dimensions[col_letter].width = 36
         else:
             ws.column_dimensions[col_letter].width = 18
@@ -411,6 +405,9 @@ def main():
     
     login_if_needed(driver)
     sleep(5)
+
+    # sleep(1000)
+
     tenders_json = sql_to_json_exclude_columns()
     tenders = json.loads(tenders_json)
     print(tenders)
@@ -433,19 +430,26 @@ def main():
             search_btn = driver.find_element(By.XPATH, "//button[contains(@class, 'ant-input-search-button')]")
             search_btn.click()
             sleep(3)
+            wait_for_user()
 
+            # Wait for the checkbox to be present and clickable
+            try:
+                checkbox_label = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, '//label[contains(@class, "custom-facet-checkbox")][contains(.,"GEM")]'))
+                )
+                checkbox_label.click()
+            except:
+                wait_for_user()
+            
 
             no_result_elements = driver.find_elements(By.XPATH, "//h5[contains(@class, 'fw-bold') and contains(text(), 'No Results Found')]")
             if no_result_elements:
                 wait_for_user()
-                # continue
-
-            wait_for_user()
 
             downloaded_file = click_download_and_get_file(driver, download_dir)
             if downloaded_file:
                 tender_arra=[]
-                
+                tender["stage"]= "LIVE"
                 tender_arra.append(tender)
                 exl(tender_arra,str(downloaded_file))
 
@@ -454,13 +458,12 @@ def main():
 
 
 
-ognisation = "NDRF"
+ognisation = "NDRF_16_7_2025"
 
-# gem_id_find = ["GEM/2025/B/6376901","GEM/2025/B/6334937","GEM/2025/B/5833446","GEM/2025/B/6330162","GEM/2025/B/6209828","GEM/2025/B/513250"]
-# gem_id_find = ["GEM/2025/B/6266864","GEM/2025/B/6073116"]
-# gem_id_find = ["GEM/2025/B/6209828"]
 # gem_id_find = ["GEM/2025/B/6423449","GEM/2025/B/6434712","GEM/2025/B/6267035","GEM/2025/B/6301369","GEM/2025/B/6259584",]
-gem_id_find = ["GEM/2025/B/6349513"]
+# gem_id_find = ["GEM/2025/B/6428166","GEM/2025/B/6423682","GEM/2025/B/6249052","GEM/2025/B/6262367","GEM/2025/B/6185838","GEM/2025/B/6241528","GEM/2025/B/6291845","GEM/2025/B/6335486",]
+# gem_id_find = ["GEM/2025/B/6392956","GEM/2025/B/6372842","GEM/2025/B/6318209","GEM/2025/B/6305040","GEM/2025/B/6305481"]
+gem_id_find = ['GEM/2025/B/6308920','GEM/2025/B/6451142','GEM/2025/B/6423449',]
 
 
 
