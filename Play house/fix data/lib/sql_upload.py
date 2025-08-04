@@ -34,30 +34,9 @@ test_tender_data = [{
 }]
 
 update_key = {
-    'DATE OF SEARCH': 'date_of_search',
-    'elementPut': 'element_put',
-    'MINISTRY': 'ministry',
-    'DEPARTMENT': 'department',
-    'ORGANISATION': 'organisation',
-    'DAY LEFT': 'day_left_formula',
-    'EMD AMOUNT': 'emd_amount',
-    'TENDER VALUE': 'tender_value',
-    'Consignee Reporting': 'consignee_reporting',
-    'ADDRESS': 'address',
-    'BRANCH': 'branch',
+
     'MSE': 'MSE',
-    'file_path': 'file_path',
-    'link': 'link_href',
-    'epbg_percentage': 'epbg_percentage',
-    'QTY': 'qty',
-    'ITEM CATEGORY': 'item_category',
-    'ITEM DESCRIPTION': 'item_description',
-    'START DATE': 'start_date',
-    'END DATE': 'end_date',
-    'END Time': 'end_time',
-    'matches': 'matches',
-    'matched_products': 'matched_products',
-    'state': 'state'
+
 }
 
 def sql(extracted_data):
@@ -83,30 +62,7 @@ def sql(extracted_data):
                 date_of_search = datetime.strptime(tender["DATE OF SEARCH"], "%d-%b-%Y").strftime("%Y-%m-%d")
 
                 data = {
-                    'DATE OF SEARCH': datetime.strptime(tender["DATE OF SEARCH"], "%d-%b-%Y").date(),
-                    'elementPut': tender.get("elementPut", ""),
-                    'MINISTRY': tender.get("MINISTRY", ""),
-                    'DEPARTMENT': tender.get("DEPARTMENT", ""),
-                    'ORGANISATION': tender.get("ORGANISATION", ""),
-                    'DAY LEFT': tender.get("DAY LEFT", ""),
-                    'BRANCH': tender.get("BRANCH", ""),
                     'MSE': tender.get("MSE", ""),
-                    'file_path': tender.get("file_path", ""),
-                    'link': tender.get("link", ""),
-                    'ITEM CATEGORY': tender.get("ITEM CATEGORY", ""),
-                    'ITEM DESCRIPTION': tender.get("ITEM DESCRIPTION", ""),
-                    'END Time': tender.get("END Time", ""),
-                    'START DATE': datetime.strptime(tender["START DATE"], "%d-%b-%Y").date(),
-                    'END DATE': datetime.strptime(tender["END DATE"], "%d-%b-%Y").date(),
-                    'QTY': int(tender.get("QTY") or 0),
-                    'matches': int(tender.get("matches") or 0),
-                    'EMD AMOUNT': float(tender.get("EMD AMOUNT") or 0),
-                    'TENDER VALUE': float(tender.get("TENDER VALUE") or 0),
-                    'Consignee Reporting': json.dumps(tender.get("Consignee Reporting", [])),
-                    'ADDRESS': json.dumps(tender.get("ADDRESS", [])),
-                    'matched_products': json.dumps(tender.get("matched_products", [])),
-                    'state': tender.get("state", ""),
-                    'epbg_percentage': tender.get("epbg_percentage", "")
                 }
 
                 if exists:

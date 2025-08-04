@@ -140,47 +140,47 @@ def bidassist(driver,tenders,MINISTRY,department):
             else: continue
         except: continue
 
-        try:
-            gem_span = card.find_element(By.CSS_SELECTOR, "span.inline-heading.disable")
-            data["gem"] = gem_span.get_attribute("title")
-        except:
-            pass
+        # try:
+        #     gem_span = card.find_element(By.CSS_SELECTOR, "span.inline-heading.disable")
+        #     data["gem"] = gem_span.get_attribute("title")
+        # except:
+        #     pass
 
-        try:
-            loc_span = card.find_element(By.CSS_SELECTOR, ".tender-locations span")
-            data["ADDRESS"] = [loc_span.text.strip()]
-        except:
-            pass
+        # try:
+        #     loc_span = card.find_element(By.CSS_SELECTOR, ".tender-locations span")
+        #     data["ADDRESS"] = [loc_span.text.strip()]
+        # except:
+        #     pass
 
-        try:
-            desc_div = card.find_element(By.CSS_SELECTOR, "div.description")
-            data["ITEM CATEGORY"] = data["description"] = desc_div.get_attribute("title").replace("Description:", "").strip()
+        # try:
+        #     desc_div = card.find_element(By.CSS_SELECTOR, "div.description")
+        #     data["ITEM CATEGORY"] = data["description"] = desc_div.get_attribute("title").replace("Description:", "").strip()
              
-        except:
-            pass
+        # except:
+        #     pass
 
-        try:
-            closed_date = card.find_element(By.CSS_SELECTOR, "span.truncate.textHeading")
-            from datetime import datetime
+        # try:
+        #     closed_date = card.find_element(By.CSS_SELECTOR, "span.truncate.textHeading")
+        #     from datetime import datetime
 
-            date_str = closed_date.text.strip()
-            data["END DATE"] = datetime.strptime(date_str, "%d %b %Y").strftime("%Y-%m-%d")
-        except:
-            pass
+        #     date_str = closed_date.text.strip()
+        #     data["END DATE"] = datetime.strptime(date_str, "%d %b %Y").strftime("%Y-%m-%d")
+        # except:
+        #     pass
 
-        try:
-            amount_span = card.find_element(By.CSS_SELECTOR, ".amount-wrap .truncate.textHeading")
-            amt_text = amount_span.text.strip().replace(",", "")
+        # try:
+        #     amount_span = card.find_element(By.CSS_SELECTOR, ".amount-wrap .truncate.textHeading")
+        #     amt_text = amount_span.text.strip().replace(",", "")
 
-            # Convert to int if it's all digits
-            if amt_text.isdigit():
-                tender_amount = int(amt_text)
-                data["tender_amount"] = tender_amount
-                data["emd_amount"] = tender_amount // 50 
-            else:
-                pass
-        except:
-            pass
+        #     # Convert to int if it's all digits
+        #     if amt_text.isdigit():
+        #         tender_amount = int(amt_text)
+        #         data["tender_amount"] = tender_amount
+        #         data["emd_amount"] = tender_amount // 50 
+        #     else:
+        #         pass
+        # except:
+        #     pass
 
         tenders.append(data)
 
@@ -193,7 +193,7 @@ def bidassist_funtion(past_tender_name):
     department = past_tender_name[1] 
     tenders = []
     
-    link= f"https://bidassist.com/tender-results/all-tenders/active?filter=KEYWORD:mosquito%20net&filter=PURCHASER_NAME:Indo%20Tibetan%20Border%20Police%7CCentral%20Reserve%20Police%20Force%7CBorder%20Security%20Force%7CCentral%20Armed%20Police%20Forces%7CAssam%20Rifles&sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=TENDER_RESULT&year=2025&removeUnavailableTenderAmountCards=false&removeUnavailableEmdCards=false"
+    link= f"https://bidassist.com/tender-results/all-tenders/active?filter=PURCHASER_NAME:Assam%20Rifles&sort=RELEVANCE:DESC&pageNumber=0&pageSize=10&tenderType=ACTIVE&tenderEntity=BID_AWARD&year=2025&"
     driver.get(link)
     sleep(0.1)
     
@@ -216,7 +216,7 @@ def bidassist_funtion(past_tender_name):
         # break
 
     print(tenders)
-    file_path = r'C:\vs_code\TenderHunter2.1.3\final\blast_from_past\tender_ids.txt'
+    file_path = r'C:\vs_code\TenderHunter2.1.3\Play house\past\tender_ids.txt'
     with open(file_path, 'a', encoding='utf-8') as outfile:
         outfile.write(str(tenders) + "\n")
     # sql(tenders)

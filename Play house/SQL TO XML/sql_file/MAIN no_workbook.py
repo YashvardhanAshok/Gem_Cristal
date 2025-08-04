@@ -16,13 +16,12 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "select * from tender_data"
-# query = "select * from tender_data where state ='MANIPUR'"
+query = "select * from tender_data WHERE end_date > CAST(GETDATE() AS DATE) and Cancel not in ('Cancel') "
 df = pd.read_sql(query, conn)
 
 # Columns to remove
-columns_to_drop = ['id',  "element_put", "consignee_reporting",  "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder']
-columns_to_drop = ['id',  "element_put", "consignee_reporting",  "date_of_search", "updated_at"]
+columns_to_drop = ['id',  "element_put",'branch',"item_category", "consignee_reporting",  "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder',"Cancel"]
+# columns_to_drop = ['id',  "element_put", "consignee_reporting",  "date_of_search", "updated_at"]
 for col in columns_to_drop:
     if col in df.columns:
         df = df.drop(columns=col)
@@ -69,9 +68,7 @@ if 'Tender Valu' in cols and 'Ten-Val Word' in cols:
 # Output file path
 save_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "xl files")) 
 output_file = f"{save_file}/Main_no-workbook.xlsx"
-# output_file = f"Main_no-workbook.xlsx"
 
-# Write full DataFrame to one sheet
 with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
     df.index = df.index + 1
     df = df.sort_index()

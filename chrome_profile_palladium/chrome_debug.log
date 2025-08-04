@@ -1,24 +1,9 @@
-[4908:19600:0721/152737.311:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
-[19772:18844:0721/152737.457:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
-[19772:18844:0721/152737.460:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
-[9176:6684:0721/152737.642:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[21456:2264:0721/152737.643:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[21568:20424:0721/152738.336:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[4908:9520:0721/152743.093:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[4908:9520:0721/152813.263:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[4908:19600:0721/152822.309:INFO:CONSOLE:1] "The provided value 'left' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.309:INFO:CONSOLE:1] "The provided value 'right' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.353:INFO:CONSOLE:1] "The provided value 'left' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.353:INFO:CONSOLE:1] "The provided value 'right' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.371:INFO:CONSOLE:1] "The provided value 'left' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.371:INFO:CONSOLE:1] "The provided value 'right' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.558:INFO:CONSOLE:1] "The provided value 'left' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.558:INFO:CONSOLE:1] "The provided value 'right' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.832:INFO:CONSOLE:1] "The provided value 'left' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152822.832:INFO:CONSOLE:1] "The provided value 'right' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152823.056:INFO:CONSOLE:1] "The provided value 'left' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:19600:0721/152823.056:INFO:CONSOLE:1] "The provided value 'right' is not a valid enum value of type CanvasDirection.", source: https://app.palladium.primenumbers.in/antv.79ae50099095f6ced0f3.bundle.js (1)
-[4908:9520:0721/152857.893:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[23212:8740:0721/152937.899:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
-[4908:9520:0721/153028.203:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[4908:9520:0721/153329.156:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[28372:384:0804/181740.676:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
+[24560:24484:0804/181740.934:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
+[24560:24484:0804/181740.937:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
+[12864:16464:0804/181740.955:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[16776:25916:0804/181740.957:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[32176:7708:0804/181742.745:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[28372:15912:0804/181746.366:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[30788:24920:0804/181806.554:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
+[30788:24920:0804/181806.555:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
