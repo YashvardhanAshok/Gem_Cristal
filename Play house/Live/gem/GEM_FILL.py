@@ -293,9 +293,43 @@ def split_into_parts(lst, n):
     return [lst[i*k + min(i, m):(i+1)*k + min(i+1, m)] for i in range(n)]
 
 raw_text = """  
-GEM/2025/B/6415334
-GEM/2025/B/6444994
+GEM/2025/B/6414351
+GEM/2025/B/6456641
+GEM/2025/B/6403646
+GEM/2025/B/6402590
+GEM/2025/B/6398808
+GEM/2025/B/6385846
+GEM/2025/B/6361796
+GEM/2025/B/6382886
+GEM/2025/B/6337823
+GEM/2025/B/6121135
+GEM/2025/B/6206597
+GEM/2025/B/6138648
+GEM/2025/B/6132335
+GEM/2025/B/6159094
 
+GEM/2025/B/6056067
+GEM/2025/B/5981206
+GEM/2025/B/5961998
+GEM/2024/B/5613644
+GEM/2025/B/5903599
+GEM/2025/B/5833198
+GEM/2025/B/5800971
+GEM/2025/B/5787058
+GEM/2025/B/5790404
+GEM/2025/B/5787747
+GEM/2025/B/5785600
+GEM/2025/B/5788510
+GEM/2025/B/5787247
+GEM/2025/B/5780166
+GEM/2024/B/5686382
+GEM/2024/B/5686382
+GEM/2024/B/5683332
+GEM/2024/B/5731576
+GEM/2024/B/5661144
+GEM/2024/B/5586096
+GEM/2024/B/5571472
+GEM/2024/B/5684030
 
 """
 
@@ -303,11 +337,9 @@ tender_ids = raw_text.strip().split('\n')
 tender_ids = set(tender_ids)
 tender_ids = list(tender_ids)
 
-max_threads = 5
+max_threads = 6
 
 split_arrays = split_into_parts(tender_ids, max_threads)
-split_arrays = set(split_arrays)
-split_arrays = list(split_arrays)
 print(split_arrays)
 Main(split_arrays)
 

@@ -16,7 +16,7 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "select * from tender_data WHERE end_date > CAST(GETDATE() AS DATE) and Cancel not in ('Cancel') "
+query = "select * from tender_data WHERE end_date >= CAST(GETDATE() AS DATE) and Cancel not in ('Cancel') "
 # query = "select * from tender_data WHERE end_date >= CAST(GETDATE() AS DATE)  "
 # query = "select * from tender_data where tender_id= 'GEM/2025/B/6526954' "
 df = pd.read_sql(query, conn)

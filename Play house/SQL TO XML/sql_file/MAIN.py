@@ -17,7 +17,7 @@ conn = pyodbc.connect(
 )
 
 # Fetch data
-query = "SELECT * FROM tender_data WHERE (end_date >= CAST(GETDATE() AS DATE)) AND (Cancel IS NULL OR Cancel = '');"
+query = "SELECT * FROM tender_data WHERE (end_date >= CAST(GETDATE() AS DATE)) AND (Cancel IS NULL OR Cancel = '') And element_put = 'ASSAM RIFLES';"
 df = pd.read_sql(query, conn)
 
 # Columns to drop
