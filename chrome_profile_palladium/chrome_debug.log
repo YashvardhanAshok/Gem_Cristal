@@ -1,9 +1,10 @@
-[28372:384:0804/181740.676:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
-[24560:24484:0804/181740.934:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
-[24560:24484:0804/181740.937:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
-[12864:16464:0804/181740.955:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[16776:25916:0804/181740.957:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[32176:7708:0804/181742.745:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
-[28372:15912:0804/181746.366:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[30788:24920:0804/181806.554:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
-[30788:24920:0804/181806.555:WARNING:net\extras\sqlite\sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net\extras\sqlite\sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
+[41508:32644:0808/164525.538:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
+[24152:41016:0808/164525.704:ERROR:ui\gl\direct_composition_support.cc:615] AMD VideoProcessorGetOutputExtension failed: Unspecified error (0x80004005)
+[24152:41016:0808/164525.707:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
+[33632:52052:0808/164525.723:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[6156:18692:0808/164525.727:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[48968:39596:0808/164526.531:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[50752:16616:0808/164526.901:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 12
+[41508:32644:0808/164527.187:INFO:CONSOLE:0] "[DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o", source: https://app.palladium.primenumbers.in/login?location=/results (0)
+[41508:22888:0808/164529.764:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[41508:22888:0808/164556.745:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT

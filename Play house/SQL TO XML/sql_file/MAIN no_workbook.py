@@ -17,9 +17,13 @@ conn = pyodbc.connect(
 
 # Fetch data
 query = "select * from tender_data WHERE end_date > CAST(GETDATE() AS DATE) and Cancel not in ('Cancel') "
+# query = "select * from tender_data WHERE end_date >= CAST(GETDATE() AS DATE)  "
+# query = "select * from tender_data where tender_id= 'GEM/2025/B/6526954' "
 df = pd.read_sql(query, conn)
 
 # Columns to remove
+# GEM/2025/B/6526954 - system
+
 columns_to_drop = ['id',  "element_put",'branch',"item_category", "consignee_reporting",  "date_of_search", "updated_at", 'file_path', 'link_href', 'Live', "extended", "L1_update", 'status','L_Placeholder',"Cancel"]
 # columns_to_drop = ['id',  "element_put", "consignee_reporting",  "date_of_search", "updated_at"]
 for col in columns_to_drop:
@@ -28,7 +32,6 @@ for col in columns_to_drop:
 
 # Replace 0s with empty strings
 df = df.replace(0, '')
-
 # Convert tender_value to readable format
 def convert_to_words(val):
     try:

@@ -173,8 +173,8 @@ def gem():
         max_threads = 4
         threads = []
 
-        MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["Roti Making Machine"]]]
-        # MINISTRY_list =  [["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINIS/TRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]],["MINISTRY OF DEFENCE", ["INDIAN ARMY"]]]
+        # MINISTRY_list =  [["MINISTRY OF HOME AFFAIRS", ["Roti Making Machine"]]]
+        MINISTRY_list =  [["MINISTRY OF DEFENCE", ["INDIAN ARMY"]]]
 
         for MINISTRY in MINISTRY_list: 
             ministry_name=MINISTRY[0]

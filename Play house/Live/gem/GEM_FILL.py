@@ -253,12 +253,10 @@ def gem_funtion(elements_list):
     sql(tenders)
     
 import threading
+
 def Main(item_list):
     try:
-        
         threads = []
-        
-        max_threads = 5
         for elements in item_list: 
             while True:
                 threads = [t for t in threads if t.is_alive()]
@@ -295,18 +293,22 @@ def split_into_parts(lst, n):
     return [lst[i*k + min(i, m):(i+1)*k + min(i+1, m)] for i in range(n)]
 
 raw_text = """  
-GEM/2025/B/6426730
+GEM/2025/B/6415334
+GEM/2025/B/6444994
 
 
 """
-# GEM/2025/B/76901
 
 tender_ids = raw_text.strip().split('\n')
 tender_ids = set(tender_ids)
 tender_ids = list(tender_ids)
 
+max_threads = 5
 
-split_arrays = split_into_parts(tender_ids, 5)
+split_arrays = split_into_parts(tender_ids, max_threads)
+split_arrays = set(split_arrays)
+split_arrays = list(split_arrays)
+print(split_arrays)
 Main(split_arrays)
 
 
