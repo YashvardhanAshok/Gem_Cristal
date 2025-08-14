@@ -17,6 +17,8 @@ from datetime import date
 import pyodbc
 from datetime import datetime
 today = date.today()
+import PyPDF2
+
 from PyPDF2 import PdfReader, PdfWriter
 from PyPDF2._page import PageObject
 import configparser
@@ -378,7 +380,7 @@ def main():
         except Exception as e:
             traceback.print_exc()
 
-item = "ordinary portland cement conforming to is 269"
+item = "high pressure portable pump for large fire fighting as per 12717"
 gem_id_find = ['GEM/2025/B/6530436']
 
 gem_id_find = ",".join(f"'{tid}'" for tid in gem_id_find)
