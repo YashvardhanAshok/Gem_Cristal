@@ -6,9 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import traceback
-import time
 import pandas as pd
-import json
 import os
 from datetime import date
 from datetime import datetime as ds
@@ -44,9 +42,9 @@ import pyodbc
 from lib.pdf_flie_reader import gem_doc_reader
 
 conn = pyodbc.connect(
-    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "DRIVER={SQL Server};"
     "SERVER=localhost\\SQLEXPRESS;"
-    "DATABASE=gem_tenders;"
+    "DATABASE=JobDB;"
     "Trusted_Connection=yes;"
 )
 

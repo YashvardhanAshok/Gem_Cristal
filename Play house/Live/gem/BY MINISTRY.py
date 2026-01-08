@@ -40,7 +40,6 @@ import pyodbc
 from selenium.webdriver.chrome.options import Options
 import sys
 
-# Dynamically add the 'lib' directory to sys.path
 from lib.gem_card import gem_find
 from lib.sql_upload import sql
 
